@@ -51,6 +51,15 @@ from utils.config import NOTION_TOKEN, NOTION_DB_ACCOUNTS_ID, OPENAI_API_KEY
 
 console = Console()
 
+# ---------------------------------------------------------------------------
+# Sender → Notion user ID mapping
+# Add new senders here; the copywriter assigns these names via NGO_OWNERS.
+# ---------------------------------------------------------------------------
+OWNER_IDS: dict[str, str] = {
+    "Carlo Renner":   "2c5d872b-594c-81ca-abfc-00023d45afd3",
+    "Lisa Gavrilova": "328d872b-594c-8133-8a1f-00020ea856a1",
+}
+
 # Notion API config
 NOTION_API_VERSION = "2022-06-28"
 NOTION_HEADERS = {
@@ -328,10 +337,6 @@ def create_account(row: dict) -> Optional[str]:
 
     # Owner* (people) — new pages always get owner assigned
     owner = clean_value(row.get("owner", ""))
-    OWNER_IDS = {
-        "Carlo Renner":   "2c5d872b-594c-81ca-abfc-00023d45afd3",
-        "Lisa Gavrilova": "328d872b-594c-8133-8a1f-00020ea856a1",
-    }
     user_id = OWNER_IDS.get(owner)
     if user_id:
         properties["Owner*"] = {"people": [{"object": "user", "id": user_id}]}
@@ -466,10 +471,6 @@ def update_account(page_id: str, row: dict) -> bool:
         current_status = current.get("Status", {}).get("status", {}).get("name", "")
         current_owner = current.get("Owner*", {}).get("people", [])
         if not current_owner or current_status == "Prospect Qualified":
-            OWNER_IDS = {
-                "Carlo Renner":   "2c5d872b-594c-81ca-abfc-00023d45afd3",
-                "Lisa Gavrilova": "328d872b-594c-8133-8a1f-00020ea856a1",
-            }
             user_id = OWNER_IDS.get(owner)
             if user_id:
                 updates["Owner*"] = {"people": [{"object": "user", "id": user_id}]}

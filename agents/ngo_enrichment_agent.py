@@ -103,6 +103,23 @@ def extract_text_from_html(html: str, max_chars: int = 12000) -> str:
     return text[:max_chars]
 
 
+_PLACEHOLDER_EMAIL_DOMAINS = {"example.com", "example.org", "example.net", "example.de"}
+_PLACEHOLDER_EMAIL_LOCALS = {
+    "john.doe", "jane.doe", "max.mustermann", "erika.mustermann",
+    "max.muster", "vorname.nachname", "firstname.lastname",
+    "name.surname", "your.name", "ihr.name",
+}
+
+def _is_placeholder_email(email: str) -> bool:
+    """Return True for documentation/form-example emails that are never real contacts."""
+    local, _, domain = email.partition("@")
+    if domain in _PLACEHOLDER_EMAIL_DOMAINS:
+        return True
+    if local in _PLACEHOLDER_EMAIL_LOCALS:
+        return True
+    return False
+
+
 def extract_emails_from_html(html: str) -> list[str]:
     """Extract email addresses from HTML source."""
     # Standard email pattern
@@ -110,8 +127,13 @@ def extract_emails_from_html(html: str) -> list[str]:
     # Also check mailto: links
     mailto = re.findall(r"mailto:([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})", html)
     all_emails = list(set(e.lower() for e in emails + mailto))
-    # Filter out obvious non-emails
-    return [e for e in all_emails if not e.endswith(".png") and not e.endswith(".jpg")]
+    # Filter out image extensions, placeholder/example addresses
+    return [
+        e for e in all_emails
+        if not e.endswith(".png")
+        and not e.endswith(".jpg")
+        and not _is_placeholder_email(e)
+    ]
 
 
 def find_subpage_urls(html: str, base_url: str) -> dict[str, str]:
@@ -245,6 +267,7 @@ Prefer in order: Geschäftsführer:in/CEO > Vorstand > Generalsekretär:in > Dir
 - Both can be filled. Never invent emails.
 - If email follows pattern (firstname.lastname@domain) but isn't explicitly shown, mention in notes and reduce confidence.
 - Normalize emails to lowercase.
+- NEVER return placeholder or example emails such as john.doe@example.com, max.mustermann@example.com, vorname.nachname@domain.de, or any address where the local part is clearly a documentation placeholder. Leave the field empty instead.
 
 ## Confidence Scoring
 - 90-100: Exact senior decision-maker found, with direct email
