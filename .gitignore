@@ -1,0 +1,39 @@
+# Secrets & environment
+.env
+.env.local
+.env.*.local
+credentials.json
+token.json
+
+# Business/campaign data - never commit raw exports or outreach lists
+data/*
+!data/prompts/
+!data/prompts/outreach_learnings.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Agent/tooling
+.claude/
+
+# Logs and generated files
+*.log
+*.pdf
