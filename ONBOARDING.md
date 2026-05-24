@@ -1,7 +1,7 @@
 # TUM Social AI - Social Partnerships Agents
 ## On-Demand Campaign Onboarding Guide
 
-**Last updated:** May 7, 2026  
+**Last updated:** May 24, 2026  
 **Audience:** TUM Social AI teammates running social partnership campaigns from Codex, Claude Code, Antigravity, a terminal, or Windows PowerShell.
 
 ---
@@ -196,8 +196,8 @@ You do **not** need coding knowledge for normal operation. You need:
 ### macOS / Linux
 
 ```bash
-git clone https://github.com/tumsocialai/social-partnerships.git
-cd social-partnerships
+git clone https://github.com/nicopaul19/tum-social-partnerships.git
+cd tum-social-partnerships
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -207,8 +207,8 @@ cp .env.template .env
 ### Windows PowerShell
 
 ```powershell
-git clone https://github.com/tumsocialai/social-partnerships.git
-cd social-partnerships
+git clone https://github.com/nicopaul19/tum-social-partnerships.git
+cd tum-social-partnerships
 py -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt

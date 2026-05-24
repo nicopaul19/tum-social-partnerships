@@ -1,449 +1,643 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TUM Social AI — Social Partnerships · Technical Reference</title>
-  <style>
-    :root {
-      --bg: #f6f7f3;
-      --panel: #ffffff;
-      --ink: #18201d;
-      --muted: #65706a;
-      --line: #dce2dc;
-      --accent: #0d6f62;
-      --accent-soft: #e8f4ef;
-      --accent-2: #9a5a2f;
-      --accent-3: #1a4f8a;
-      --code: #111827;
-      --node-input:   #dbeafe; --node-input-ink:   #1e3a5f; --node-input-border:   #93c5fd;
-      --node-auto:    #d1fae5; --node-auto-ink:    #064e3b; --node-auto-border:    #6ee7b7;
-      --node-manual:  #fef9c3; --node-manual-ink:  #713f12; --node-manual-border:  #fde047;
-      --node-file:    #f1f5f9; --node-file-ink:    #334155; --node-file-border:    #cbd5e1;
-      --node-parallel:#ede9fe; --node-parallel-ink:#3b0764; --node-parallel-border:#c4b5fd;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--ink);
-           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; line-height: 1.55; }
-    header { background: var(--panel); border-bottom: 1px solid var(--line); padding: 40px 24px 28px; }
-    .wrap { max-width: 1100px; margin: 0 auto; }
-    .eyebrow { color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .1em;
-               text-transform: uppercase; margin-bottom: 10px; }
-    h1 { font-size: 38px; line-height: 1.1; margin: 0 0 10px; }
-    .lead { max-width: 720px; color: var(--muted); font-size: 17px; margin: 0; }
-    .scope-note { display: inline-block; margin-top: 14px; padding: 7px 13px;
-                  background: var(--accent-soft); border: 1px solid #a7d9d1; border-radius: 6px;
-                  font-size: 13px; color: #17463f; }
-    main { padding: 24px 24px 56px; }
-    section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
-              padding: 24px; margin: 16px 0; }
-    h2 { font-size: 22px; margin: 0 0 14px; }
-    h3 { font-size: 16px; margin: 20px 0 8px; color: var(--accent); }
-    h4 { font-size: 12px; margin: 16px 0 6px; text-transform: uppercase;
-         letter-spacing: .07em; color: var(--muted); font-weight: 700; }
-    p { margin: 8px 0; }
-    ul, ol { padding-left: 20px; } li { margin: 5px 0; }
-    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
-    th, td { text-align: left; vertical-align: top; padding: 9px 11px; border-bottom: 1px solid var(--line); }
-    th { color: var(--muted); font-weight: 700; background: #fafbf8; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
-    code { background: #eef2ee; color: var(--code); padding: 2px 5px; border-radius: 4px;
-           font-family: "SFMono-Regular", Consolas, monospace; font-size: .88em; }
-    pre { overflow-x: auto; background: #111827; color: #f9fafb; padding: 14px 16px;
-          border-radius: 8px; font-size: 12.5px; line-height: 1.6; }
-    pre code { background: transparent; color: inherit; padding: 0; }
-    .note  { border-left: 4px solid var(--accent);  padding: 9px 13px; background: var(--accent-soft); color: #17463f; border-radius: 5px; margin: 10px 0; }
-    .warn  { border-left: 4px solid var(--accent-2); padding: 9px 13px; background: #fff2e8; color: #603616; border-radius: 5px; margin: 10px 0; }
-    .info  { border-left: 4px solid var(--accent-3); padding: 9px 13px; background: #eff6ff; color: #1e3a5f; border-radius: 5px; margin: 10px 0; }
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .param-box { background: #f8faf7; border: 1px solid var(--line); border-radius: 7px; padding: 14px; }
-    .tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin: 1px 2px; }
-    .tag-green  { background: #d1fae5; color: #064e3b; }
-    .tag-yellow { background: #fef9c3; color: #713f12; }
-    .tag-red    { background: #fee2e2; color: #7f1d1d; }
-    .tag-blue   { background: #dbeafe; color: #1e3a5f; }
-    .tag-gray   { background: #f1f5f9; color: #334155; }
-
-    /* Score bars */
-    .score-bars { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
-    .score-bar  { display: flex; align-items: center; gap: 10px; }
-    .score-bar-label { width: 210px; font-size: 13px; flex-shrink: 0; }
-    .score-bar-track { flex: 1; height: 10px; background: #e5e7eb; border-radius: 5px; overflow: hidden; }
-    .score-bar-fill  { height: 100%; background: var(--accent); border-radius: 5px; }
-    .score-bar-pct   { font-size: 13px; font-weight: 700; color: var(--accent); width: 36px; text-align: right; }
-
-    /* ── FLOW DIAGRAM ─────────────────────────────────────────────────── */
-    .flow-diagram { padding: 8px 0 4px; overflow-x: auto; }
-    .flow-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; font-size: 12px; }
-    .flow-legend-item { display: flex; align-items: center; gap: 6px; }
-    .flow-legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
-
-    .pipeline { display: flex; flex-direction: column; gap: 0; }
-    .stage { display: flex; align-items: flex-start; gap: 0; margin: 0; }
-    .stage-label { width: 110px; flex-shrink: 0; font-size: 11px; font-weight: 700;
-                   text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
-                   padding-top: 14px; text-align: right; padding-right: 14px; }
-    .stage-nodes { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 6px 0; }
-    .stage-connector { display: flex; margin-left: 110px; padding-left: 14px; }
-    .vline { width: 2px; height: 22px; background: var(--line); margin-left: 52px; }
-    .arrow-down { width: 0; height: 0; border-left: 6px solid transparent;
-                  border-right: 6px solid transparent; border-top: 8px solid #b0bac8; margin-left: 49px; }
-    .arrow-right { width: 0; height: 0; border-top: 6px solid transparent;
-                   border-bottom: 6px solid transparent; border-left: 8px solid #b0bac8; }
-    .hline { height: 2px; width: 20px; background: var(--line); margin-top: 14px; }
-
-    /* Parallel tracks side by side */
-    .parallel-wrap { display: flex; align-items: flex-start; gap: 24px;
-                     margin-left: 110px; padding-left: 14px; padding-top: 6px; }
-    .parallel-col { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 160px; }
-    .parallel-label { font-size: 11px; color: var(--muted); font-style: italic; margin-bottom: 2px; }
-    .parallel-divider { width: 1.5px; background: #cbd5e1; align-self: stretch; margin: 0 4px; }
-
-    .node { display: inline-flex; flex-direction: column; border-radius: 8px; padding: 9px 13px;
-            min-width: 110px; border-width: 1.5px; border-style: solid; font-size: 12.5px; line-height: 1.35; }
-    .node-title { font-weight: 700; }
-    .node-sub   { font-size: 11px; opacity: .75; margin-top: 2px; }
-    .node-input    { background: var(--node-input);    color: var(--node-input-ink);    border-color: var(--node-input-border); }
-    .node-auto     { background: var(--node-auto);     color: var(--node-auto-ink);     border-color: var(--node-auto-border); }
-    .node-manual   { background: var(--node-manual);   color: var(--node-manual-ink);   border-color: var(--node-manual-border); }
-    .node-file     { background: var(--node-file);     color: var(--node-file-ink);     border-color: var(--node-file-border); }
-    .node-parallel { background: var(--node-parallel); color: var(--node-parallel-ink); border-color: var(--node-parallel-border); }
-    .node-plus { font-size: 16px; font-weight: 300; color: #94a3b8; align-self: center; margin: 0 2px; }
-
-    .mini-vline { width: 2px; height: 14px; background: var(--line); }
-
-    @media (max-width: 700px) {
-      h1 { font-size: 28px; } section { padding: 16px; }
-      .two-col { grid-template-columns: 1fr; }
-      .stage-label { width: 80px; font-size: 10px; }
-      .stage-connector, .parallel-wrap { margin-left: 80px; }
-      .parallel-wrap { flex-direction: column; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TUM Social AI — Social Partnerships Onboarding</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 24px; color: #1a1a1a; line-height: 1.7; }
+  h1 { color: #0a2463; border-bottom: 3px solid #0a2463; padding-bottom: 8px; }
+  h2 { color: #0a2463; margin-top: 2.5em; }
+  h3 { color: #333; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  th { background: #0a2463; color: white; padding: 10px 14px; text-align: left; }
+  td { padding: 8px 14px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f7f9fc; }
+  code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+  pre { background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; color: inherit; padding: 0; }
+  a { color: #0a2463; }
+  blockquote { border-left: 4px solid #0a2463; margin: 0; padding: 8px 16px; background: #f0f4ff; }
+</style>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <div class="eyebrow">TUM Social AI · Social Partnerships</div>
-    <h1>Technical Reference</h1>
-    <p class="lead">Exact parameters, data flow, scoring weights, enrichment strategy, and change guide. For commands, cadence, and setup see the Notion page.</p>
-    <span class="scope-note">This doc = <strong>how it works under the hood + how to change it.</strong> &nbsp;Notion page = what to run and when.</span>
-  </div>
-</header>
-<main class="wrap">
+<h1>TUM Social AI - Social Partnerships Agents</h1>
+<h2>On-Demand Campaign Onboarding Guide</h2>
+<p><strong>Last updated:</strong> May 24, 2026<br />
+<strong>Audience:</strong> TUM Social AI teammates running social partnership campaigns from Codex, Claude Code, Antigravity, a terminal, or Windows PowerShell.</p>
+<hr />
+<h2>1. What This Infrastructure Does</h2>
+<p>This repo helps the Social Partnerships team turn nonprofit source lists and incoming project requests into organized Notion records and ready-to-review outreach.</p>
+<p>The main workflow is on demand:</p>
+<ol>
+<li>Turns nonprofit source CSVs into scored and ranked partnership prospects.</li>
+<li>Enriches top organizations with websites, contacts, roles, and email addresses.</li>
+<li>Generates German outreach copy for social partnership campaigns.</li>
+<li>Uploads applying nonprofits and contacts into Notion Accounts and Contacts from <a href="https://www.notion.so/311a0c6e61688042bc34ee81e5ebc631?pvs=21">Project Requirements</a>.</li>
+<li>Processes incoming project applications through the project-applications intake flow with an AI GTM expert.</li>
+<li>Sends a completion report if Gmail credentials are configured.</li>
+</ol>
+<p>There is also a project-applications intake flow for organizations that already submitted a Tally form. That intake flow can stay scheduled because it is lightweight and idempotent. Campaign creation, ranking, copywriting, uploads, and maintenance should happen when a teammate deliberately asks for them.</p>
+<h3>What Each Agent Is Built On</h3>
+<table>
+<thead>
+<tr>
+<th>Agent / flow</th>
+<th>What it does</th>
+<th>Criteria and logic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ngo_partner_agent</code></td>
+<td>Scores and ranks nonprofit prospects from source CSVs.</td>
+<td>Uses GPT-4o structured output with three weighted criteria: <strong>size/impact</strong> at 35%, <strong>mission + AI applicability</strong> at 35%, and <strong>establishment/track record</strong> at 30%. Size/impact looks at likely staff, budget, reach, and public scale signals. Mission + AI applicability asks whether the mission is socially meaningful and whether AI could realistically help. Establishment looks at age, reliability, legal/public signals, DZI/Spendenrat-style trust signals when known, and public familiarity.</td>
+</tr>
+<tr>
+<td><code>ngo_enrichment_agent</code></td>
+<td>Finds the best partnership contact and best available email.</td>
+<td>Crawls the organization's homepage and likely subpages such as <code>impressum</code>, <code>about</code>, <code>team</code>, <code>leadership</code>, <code>contact</code>, <code>digital</code>, and <code>innovation</code>. It prefers senior decision-makers for small/mid-sized nonprofits, then digital/IT/innovation/partnerships leads for larger organizations. It avoids press, fundraising, volunteer, and generic office contacts unless nothing better exists.</td>
+</tr>
+<tr>
+<td><code>ngo_copywriter_agent</code></td>
+<td>Generates German outreach drafts for the campaign sender.</td>
+<td>Uses the RRR structure: relevance, reward, request. The prompt enforces German language, short paragraphs, nonprofit-sensitive tone, no hype, no hallucinated facts, a low-friction 20-minute CTA, and sender-specific sign-off. Processed learnings from <code>data/prompts/outreach_learnings.md</code> are injected into future runs.</td>
+</tr>
+<tr>
+<td><code>notion_import_ngos</code></td>
+<td>Uploads reviewed campaign rows into Notion Accounts and contact-related fields.</td>
+<td>Deduplicates by normalized domain and organization name. Maps CSV fields into Notion properties such as organization, website, city, work area, mission, campaign ID, lead score, estimated employees, suspect contact, email subject/body, and AI partnership angle.</td>
+</tr>
+<tr>
+<td>Project applications intake</td>
+<td>Processes nonprofits that applied through the Project Requirements flow.</td>
+<td><code>requirements_analyzer.py</code> acts as an AI GTM + forward-deployed-engineering reviewer. It reads problem statement, current effort, usage frequency, benefits, data readiness, data language, and tech stack. It writes a concise proposed AI/ML solution, engineering blockers, and clarification questions into Project Requirements. <code>enrich_requirements.py</code> then fuzzy-matches or creates the Account and Product Owner contact, links them back to the requirement, and moves the application to review.</td>
+</tr>
+</tbody>
+</table>
+<h3>Scoring Criteria Details</h3>
+<p><code>ngo_partner_agent</code> returns <code>size_score</code>, <code>mission_score</code>, <code>establishment_score</code>, <code>total_score</code>, <code>reasoning</code>, and <code>ai_partnership_angle</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Criterion</th>
+<th style="text-align: right;">Weight</th>
+<th>High score means</th>
+<th>Low score means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Size / Impact</td>
+<td style="text-align: right;">35%</td>
+<td>Major national or regional organization, strong reach, visible operations, likely budget/staff capacity, broad beneficiary base.</td>
+<td>Very small initiative, unclear operations, little public footprint, likely volunteer-only, or cannot determine.</td>
+</tr>
+<tr>
+<td>Mission + AI Applicability</td>
+<td style="text-align: right;">35%</td>
+<td>Compelling social/environmental mission with plausible AI use cases such as triage, matching, reporting, accessibility, knowledge management, impact measurement, or data analysis.</td>
+<td>Weak mission fit, unclear social value, little AI leverage, or a use case that feels forced.</td>
+</tr>
+<tr>
+<td>Establishment / Track Record</td>
+<td style="text-align: right;">30%</td>
+<td>Long-running, reliable organization with public trust signals, strong reputation, known legal form, DZI/Spendenrat-style signals when available.</td>
+<td>New/unknown organization, little evidence, unclear legal status, or too little public information.</td>
+</tr>
+</tbody>
+</table>
+<p>The ranking is a shortlist tool, not a final truth. Human review should still remove organizations that are politically sensitive, unreachable, off-mission, too small, too large, or poor timing for the campaign.</p>
+<hr />
+<h2>2. Needed Input Before Agents Can Start</h2>
+<p>The agents do not discover a whole campaign from nothing. They need a source list first.</p>
+<h3>Minimal CSV Requirements</h3>
+<p>For the NGO sourcing pipeline, the safest input is a CSV with one row per organization and these columns:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th style="text-align: right;">Required</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ngo_name</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Organization name. This is the main identity field and dedup anchor.</td>
+</tr>
+<tr>
+<td><code>col href</code></td>
+<td style="text-align: right;">Strongly recommended</td>
+<td>NGO profile or website URL. The enrichment agent uses it to find contact pages and evidence.</td>
+</tr>
+<tr>
+<td><code>work_area</code></td>
+<td style="text-align: right;">Strongly recommended</td>
+<td>Main mission category, used for scoring and campaign ID mission naming.</td>
+</tr>
+<tr>
+<td><code>sub_work_area</code></td>
+<td style="text-align: right;">Helpful</td>
+<td>More specific mission category, improves personalization.</td>
+</tr>
+<tr>
+<td><code>listing_locations</code></td>
+<td style="text-align: right;">Helpful</td>
+<td>Country, city, or region, used for relevance and filtering.</td>
+</tr>
+<tr>
+<td><code>account_type</code></td>
+<td style="text-align: right;">Optional</td>
+<td>Defaults to NGO/nonprofit if missing.</td>
+</tr>
+</tbody>
+</table>
+<p>The current pipeline was built around NGO.base exports, so it expects NGO.base-style column names. If another source uses different headers, rename them before running the agents or ask Codex to normalize the CSV.</p>
+<h3>Main Focus For A Good Campaign</h3>
+<p>Prioritize lists that are:</p>
+<ul>
+<li>Mission-filtered: health, environment, education, disability, migration, humanitarian aid, climate, animal welfare, human rights, civic tech, or similar.</li>
+<li>Region-filtered: Germany, DACH, EU, or a specific city/region that matters to the campaign.</li>
+<li>Operationally plausible: organizations with a real website, visible activity, and enough team capacity to respond.</li>
+<li>AI-relevant: organizations likely to benefit from process automation, data analysis, reporting, matching, triage, accessibility, knowledge management, or impact measurement.</li>
+<li>Not too huge and not too tiny: the sweet spot is often established small-to-mid-sized nonprofits that have real operations but are not unreachable global institutions.</li>
+</ul>
+<h3>Limitations</h3>
+<ul>
+<li>The agents are only as good as the input list. Dirty source data creates weak enrichment and generic copy.</li>
+<li>Contact discovery is best-effort. Some organizations hide staff pages or only publish general inboxes.</li>
+<li>Scoring uses model judgment and public context; it should guide review, not replace human review.</li>
+<li>A CSV with only names can be processed, but quality drops sharply without website, mission, and region fields.</li>
+<li>The tools do not send outreach automatically. They prepare records and copy for teammates to review and send.</li>
+<li>Always respect source website terms, privacy expectations, and sensible scraping limits.</li>
+</ul>
+<hr />
+<h2>3. Current Source Acquisition: NGO.base + Instant Data Scraper</h2>
+<p>This is the current working approach.</p>
+<ol>
+<li>Open NGO.base and search by country, region, work area, or keyword.</li>
+<li>Use filters for the campaign's main focus, for example <code>Germany + Environment</code>, <code>Switzerland + Health</code>, or <code>EU + Disability Support</code>.</li>
+<li>Scroll or paginate until the visible result set matches the campaign scope.</li>
+<li>Open the <strong>Instant Data Scraper</strong> Chrome extension.</li>
+<li>Let it auto-detect the repeated organization cards/table.</li>
+<li>Check the preview before export. Keep at least organization name, profile/website URL, work area, sub-work area, and location.</li>
+<li>Use the extension's pagination/next-page option only when the detected rows stay consistent.</li>
+<li>Export as CSV.</li>
+<li>Save the file in <code>data/inputs/</code> with a clear campaign-oriented name, for example:</li>
+</ol>
+<pre><code class="language-bash">data/inputs/ngobase_germany_environment_2026-05.csv
+</code></pre>
+<ol>
+<li>Normalize headers if needed:</li>
+</ol>
+<pre><code class="language-text">name -&gt; ngo_name
+url/profile_url/website -&gt; col href
+category -&gt; work_area
+subcategory -&gt; sub_work_area
+location/country/city -&gt; listing_locations
+</code></pre>
+<ol>
+<li>Run a dry run first:</li>
+</ol>
+<pre><code class="language-bash">python -m agents.run_ngo_pipeline --csv &quot;data/inputs/ngobase_germany_environment_2026-05.csv&quot; --dry-run
+</code></pre>
+<h3>NGO.base Notes</h3>
+<p>NGO.base is useful because it already exposes NGO directories by country/work area and supports search/filter workflows. Treat it as a starting list, not as verified truth. The agents still need to score, enrich, and deduplicate the resulting organizations.</p>
+<h3>Instant Data Scraper Notes</h3>
+<p>Instant Data Scraper is useful for repeated-card/table pages. Before exporting, check:</p>
+<ul>
+<li>Row count matches what you expected from the page.</li>
+<li>Organization names are not mixed with navigation labels.</li>
+<li>URLs are real organization/profile URLs, not just icons or repeated category URLs.</li>
+<li>Pagination did not duplicate the first page.</li>
+<li>The CSV opens cleanly in Numbers, Excel, or a text editor.</li>
+</ul>
+<p>If the scraper mis-detects columns, try selecting a different repeated element, reducing active filters, scraping one category at a time, or using another extension such as Data Miner/Tabon/Squirrel Snap.</p>
+<hr />
+<h2>4. Other Source Options To Explore</h2>
+<p>These are promising sources, but not yet fully integrated into the pipeline.</p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Good for</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NGO.base</td>
+<td>Broad NGO discovery by country, region, and work area.</td>
+<td>Tried and currently used.</td>
+</tr>
+<tr>
+<td>DZI donation advice/search</td>
+<td>German charities by work area, country, and seal status.</td>
+<td>Worth testing for higher-trust German charity campaigns.</td>
+</tr>
+<tr>
+<td>EU Transparency Register</td>
+<td>EU-facing civil society, advocacy, policy, association, and NGO actors.</td>
+<td>Worth testing for policy/European campaigns; may include many non-NGO interest representatives.</td>
+</tr>
+<tr>
+<td>Council of Europe INGO database</td>
+<td>INGOs with participatory status, searchable by competence area and country.</td>
+<td>Worth testing for established European/international civil society.</td>
+</tr>
+<tr>
+<td>GlobalGiving Atlas</td>
+<td>Large global nonprofit database.</td>
+<td>Worth exploring if the team needs global coverage or API-style enrichment.</td>
+</tr>
+<tr>
+<td>National charity registers</td>
+<td>Country-specific nonprofit verification and discovery.</td>
+<td>Left to explore per country.</td>
+</tr>
+<tr>
+<td>Network member pages</td>
+<td>Members of umbrella organizations, alliances, coalitions, and sector networks.</td>
+<td>High-quality but source-specific scraping work remains.</td>
+</tr>
+<tr>
+<td>Grant/funding winner pages</td>
+<td>Organizations that recently received funding or awards.</td>
+<td>Promising trigger-event source; needs a repeatable collection workflow.</td>
+</tr>
+<tr>
+<td>Event speaker/participant pages</td>
+<td>NGOs active in conferences, hackathons, climate/health/social impact events.</td>
+<td>Promising trigger-event source; needs manual validation.</td>
+</tr>
+<tr>
+<td>News and press releases</td>
+<td>NGOs reacting to crises, new programs, or policy windows.</td>
+<td>Promising but noisy; best for targeted campaign ideas.</td>
+</tr>
+<tr>
+<td>LinkedIn Boolean search</td>
+<td>People/org discovery by mission, role, and geography.</td>
+<td>Useful for contact discovery, less reliable as the primary organization list.</td>
+</tr>
+</tbody>
+</table>
+<h3>What Has Been Tried Already</h3>
+<ul>
+<li>NGO.base category/region scraping with Instant Data Scraper.</li>
+<li>Pipeline processing of NGO.base-style CSVs with <code>ngo_name</code>, <code>col href</code>, <code>work_area</code>, <code>sub_work_area</code>, and <code>listing_locations</code>.</li>
+<li>Scoring, enrichment, copywriting, and Notion upload from the generated CSVs.</li>
+</ul>
+<h3>What Is Left To Explore</h3>
+<ul>
+<li>A reliable CSV normalization step for non-NGO.base sources.</li>
+<li>A small benchmark comparing NGO.base, DZI, EU Transparency Register, Council of Europe INGO database, and GlobalGiving Atlas for reply quality.</li>
+<li>A trigger-event sourcing workflow based on grant winners, conference participants, recent reports, or crisis/program launches.</li>
+<li>A source-quality score so campaigns can prioritize clean, fresh, reachable organizations.</li>
+<li>Country-specific source playbooks for Germany, Austria, Switzerland, and broader EU campaigns.</li>
+</ul>
+<hr />
+<h2>5. What Teammates Need</h2>
+<p>You do <strong>not</strong> need coding knowledge for normal operation. You need:</p>
+<ul>
+<li>One vibe-coding or agentic environment: <strong>Codex</strong>, <strong>Claude Code</strong>, <strong>Antigravity</strong>, or a normal terminal.</li>
+<li>A local clone of this repository.</li>
+<li>Python 3.9+.</li>
+<li>Access to the shared TUM Social AI Notion workspace.</li>
+<li>A Notion integration token with access to the Accounts database and Contacts database.</li>
+<li>An OpenAI API key or an environment/license that lets you use the required OpenAI calls.</li>
+<li>Optional: a Gmail app password if you want the pipeline to send completion reports from your laptop.</li>
+</ul>
+<h3>API Credit Basics</h3>
+<ul>
+<li>Running existing agents is usually cheaper. Credits are mainly used when the code calls OpenAI for scoring, enrichment reasoning, and outreach copy.</li>
+<li>Building, changing, or debugging agents costs more because the coding environment itself uses model calls while editing and testing.</li>
+<li>Notion writes and local CSV work are not the expensive part. The costly moments are AI calls, especially broad campaign scoring and full copywriting batches.</li>
+</ul>
+<hr />
+<h2>6. Setup From GitHub</h2>
+<h3>macOS / Linux</h3>
+<pre><code class="language-bash">git clone https://github.com/nicopaul19/tum-social-partnerships.git
+cd tum-social-partnerships
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.template .env
+</code></pre>
+<h3>Windows PowerShell</h3>
+<pre><code class="language-powershell">git clone https://github.com/nicopaul19/tum-social-partnerships.git
+cd tum-social-partnerships
+py -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+copy .env.template .env
+</code></pre>
+<h3>Required <code>.env</code> Values</h3>
+<pre><code class="language-bash">OPENAI_API_KEY=
+NOTION_TOKEN=
+NOTION_DB_ACCOUNTS_ID=
+NOTION_DB_CONTACTS_ID=
+NOTION_DB_REQUIREMENTS_ID=
+</code></pre>
+<p>Optional Gmail report delivery:</p>
+<pre><code class="language-bash">GMAIL_ADDRESS=
+GMAIL_APP_PASSWORD=
+</code></pre>
+<p>Use a Gmail app password, not your normal Gmail password. Google requires 2-step verification before app passwords are available.</p>
+<h3>Important Notion Access Note</h3>
+<p>The Notion Contacts database must be shared with the active Notion integration. The current API access can return <code>404</code> for the Contacts DB even when the database ID is correct. If that happens, open the Contacts DB in Notion, share it with the integration connected to <code>NOTION_TOKEN</code>, and retry.</p>
+<h3>Verify Setup</h3>
+<pre><code class="language-bash">python -c &quot;from utils.config import validate_config; ok, missing = validate_config(); print('OK' if ok else 'Missing: ' + ', '.join(missing))&quot;
+python -m agents.run_ngo_pipeline --help
+</code></pre>
+<p>Open the local docs:</p>
+<ul>
+<li>Markdown: <a href="ONBOARDING.md">ONBOARDING.md</a></li>
+<li>HTML: <a href="ONBOARDING.html">ONBOARDING.html</a></li>
+</ul>
+<hr />
+<h2>7. Environment Variables</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th style="text-align: right;">Required</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Scoring, enrichment reasoning, and outreach copy generation.</td>
+</tr>
+<tr>
+<td><code>NOTION_TOKEN</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Writing Accounts, Contacts, and project application data to Notion.</td>
+</tr>
+<tr>
+<td><code>NOTION_DB_ACCOUNTS_ID</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Social partner organization records.</td>
+</tr>
+<tr>
+<td><code>NOTION_DB_CONTACTS_ID</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Contact records linked to Accounts. Must be shared with the integration.</td>
+</tr>
+<tr>
+<td><code>NOTION_DB_REQUIREMENTS_ID</code></td>
+<td style="text-align: right;">For project applications</td>
+<td>Incoming project/application records from the intake workflow.</td>
+</tr>
+<tr>
+<td><code>GMAIL_ADDRESS</code></td>
+<td style="text-align: right;">Optional</td>
+<td>Sender address for completion reports.</td>
+</tr>
+<tr>
+<td><code>GMAIL_APP_PASSWORD</code></td>
+<td style="text-align: right;">Optional</td>
+<td>Gmail app password for sending completion reports.</td>
+</tr>
+</tbody>
+</table>
+<p>The config loader reads a shared workspace <code>.env</code> first, then this repo's <code>.env</code> with override priority.</p>
+<hr />
+<h2>8. Command-First Campaign Lifecycle</h2>
+<p>The social partnerships campaign flow uses the module commands below.</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>When</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Full campaign run</td>
+<td>You have a clean nonprofit CSV and want the end-to-end flow</td>
+<td><code>python -m agents.run_ngo_pipeline --csv "data/inputs/my_ngos.csv"</code></td>
+</tr>
+<tr>
+<td>Full dry run</td>
+<td>You want to test the flow without Notion writes or email reports</td>
+<td><code>python -m agents.run_ngo_pipeline --csv "data/inputs/my_ngos.csv" --dry-run</code></td>
+</tr>
+<tr>
+<td>Score/rank only</td>
+<td>You want a shortlist before enrichment</td>
+<td><code>python -m agents.ngo_partner_agent --csv "data/inputs/my_ngos.csv" --min-score 6 --top 25</code></td>
+</tr>
+<tr>
+<td>Enrich contacts</td>
+<td>You already have <code>data/ngo_partnerships/ngo_ranked.csv</code></td>
+<td><code>python -m agents.ngo_enrichment_agent</code></td>
+</tr>
+<tr>
+<td>Generate outreach</td>
+<td>You already have <code>data/ngo_partnerships/ngo_enriched.csv</code></td>
+<td><code>python -m agents.ngo_copywriter_agent --campaign-id "NGOs_DDMMYYYY_Topic"</code></td>
+</tr>
+<tr>
+<td>Preview outreach</td>
+<td>You want to inspect copy before saving</td>
+<td><code>python -m agents.ngo_copywriter_agent --dry-run --limit 5</code></td>
+</tr>
+<tr>
+<td>Upload to Notion</td>
+<td>You already have an outreach CSV</td>
+<td><code>python -m agents.notion_import_ngos --csv "data/ngo_partnerships/ngo_outreach.csv"</code></td>
+</tr>
+<tr>
+<td>Preview Notion upload</td>
+<td>You want to check creates/updates without writing</td>
+<td><code>python -m agents.notion_import_ngos --csv "data/ngo_partnerships/ngo_outreach.csv" --dry-run --limit 5</code></td>
+</tr>
+<tr>
+<td>Project applications intake</td>
+<td>You want to process new Tally applications manually</td>
+<td><code>cd project-applications &amp;&amp; python requirements_analyzer.py &amp;&amp; python enrich_requirements.py</code></td>
+</tr>
+</tbody>
+</table>
+<p>The full pipeline creates a campaign ID like <code>NGOs_DDMMYYYY_Mission</code>, assigns owners across the ranked list, writes CSV outputs in <code>data/ngo_partnerships/</code>, uploads to Notion unless <code>--dry-run</code> is set, and sends the completion email only when Gmail credentials exist.</p>
+<hr />
+<h2>9. Campaign Lifecycle</h2>
+<ol>
+<li><strong>Prepare input.</strong> Export a CSV from ngobase or another approved source. Keep columns such as <code>ngo_name</code>, <code>col href</code>, <code>work_area</code>, <code>sub_work_area</code>, <code>listing_locations</code>, and <code>account_type</code>.</li>
+<li><strong>Run a dry run first.</strong> Use <code>--dry-run</code> on the full pipeline when the campaign is new or the CSV source changed.</li>
+<li><strong>Review the ranked CSV.</strong> Check <code>data/ngo_partnerships/ngo_ranked.csv</code> for relevance and score quality.</li>
+<li><strong>Generate and inspect outreach.</strong> Use the copywriter dry run or review <code>data/ngo_partnerships/ngo_outreach.csv</code>.</li>
+<li><strong>Upload intentionally.</strong> Run the full pipeline without <code>--dry-run</code>, or run <code>notion_import_ngos</code> on an already-reviewed outreach CSV.</li>
+<li><strong>Send and maintain.</strong> Teammates send outreach from their own accounts, record outcomes in Notion, and add copywriter examples to the improvement log.</li>
+</ol>
+<hr />
+<h2>10. Operating Schedule</h2>
+<p>No one needs to maintain a fixed weekly report rhythm. Use recurring calendar blocks as reminders, then run campaign actions only when useful.</p>
+<table>
+<thead>
+<tr>
+<th>Cadence</th>
+<th>Calendar block</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Continuous</td>
+<td>Partner signal capture</td>
+<td>Save strong nonprofit prospects, referrals, and source CSVs.</td>
+</tr>
+<tr>
+<td>On campaign start</td>
+<td>60 min shortlist and enrichment block</td>
+<td>Clean the CSV, run a dry run, review ranked prospects, and decide whether to continue.</td>
+</tr>
+<tr>
+<td>Before outreach</td>
+<td>30 min copy review block</td>
+<td>Review generated email copy and update weak examples in the improvement log.</td>
+</tr>
+<tr>
+<td>During active campaign</td>
+<td>20 min follow-up block</td>
+<td>Check replies, update Notion statuses, and decide next actions.</td>
+</tr>
+<tr>
+<td>After enough examples</td>
+<td>30 min learning block</td>
+<td>Move processed examples into <code>data/prompts/outreach_learnings.md</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Recommended calendar CTA: create one recurring <strong>Social Partnerships Campaign Maintenance</strong> block every 1-2 weeks, plus one campaign-specific block whenever a new source list is ready.</p>
+<hr />
+<h2>11. Automation Policy</h2>
+<p>Campaign jobs should be manual/on demand. The only scheduled jobs that should stay active are lightweight intake jobs that process new applications or saved inputs.</p>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>Policy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>com.tumsocialai.project-applications</code></td>
+<td>Keep if this laptop owns project application intake.</td>
+</tr>
+<tr>
+<td><code>com.tumsocialai.requirements-enrichment</code></td>
+<td>Keep if this laptop owns application enrichment.</td>
+</tr>
+<tr>
+<td>Ranking, enrichment, copywriter, upload, cleanup, feedback, and LinkedIn campaign jobs</td>
+<td>Run manually when a teammate asks.</td>
+</tr>
+</tbody>
+</table>
+<p>On macOS, inspect active jobs with:</p>
+<pre><code class="language-bash">launchctl print gui/$(id -u) | grep tumsocialai
+</code></pre>
+<p>If an old campaign job appears active, unload it intentionally after confirming ownership:</p>
+<pre><code class="language-bash">launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.tumsocialai.sales-ranking.plist
+</code></pre>
+<p>Do not delete plist files unless the team explicitly decides they are no longer needed.</p>
+<hr />
+<h2>12. Copywriter Improvement Log</h2>
+<p>Use the lightweight Notion toggle style inside the Partnerships Agents page:</p>
+<ul>
+<li><code>not yet processed</code></li>
+<li><code>processed</code></li>
+</ul>
+<p>Each item should capture:</p>
+<ul>
+<li>Bad/generated snippet.</li>
+<li>Improved version.</li>
+<li>Reason for improvement.</li>
+<li>Campaign/contact context.</li>
+<li>Processed status.</li>
+</ul>
+<p>When a learning is processed, distill the general rule into:</p>
+<pre><code class="language-bash">data/prompts/outreach_learnings.md
+</code></pre>
+<p>Keep the file as reusable guidance, not a graveyard of full emails. A good processed learning sounds like: "When the AI angle is speculative, use 'konnte zum Beispiel spannend sein' and ask for the organization's real bottlenecks, instead of stating the use case as fact."</p>
+<hr />
+<h2>13. Troubleshooting</h2>
+<h3>Notion Contacts DB returns 404</h3>
+<p>The DB ID may be correct but hidden from the integration.</p>
+<p>Fix:</p>
+<ol>
+<li>Open the Contacts database in Notion.</li>
+<li>Click <strong>Share</strong>.</li>
+<li>Invite the active Notion integration used by <code>NOTION_TOKEN</code>.</li>
+<li>Re-run a dry run upload.</li>
+</ol>
+<h3><code>OPENAI_API_KEY not set</code></h3>
+<p>Check that <code>.env</code> exists in this repo or in the shared workspace root:</p>
+<pre><code class="language-bash">python -c &quot;from utils.config import OPENAI_API_KEY; print(bool(OPENAI_API_KEY))&quot;
+</code></pre>
+<h3>Virtual environment is not active</h3>
+<p>macOS / Linux:</p>
+<pre><code class="language-bash">source venv/bin/activate
+</code></pre>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\venv\Scripts\Activate.ps1
+</code></pre>
+<h3>Gmail report fails</h3>
+<p>The pipeline can still complete without email reports. If reports should send, confirm <code>GMAIL_ADDRESS</code> and <code>GMAIL_APP_PASSWORD</code>, and make sure the password is a Gmail app password.</p>
+<h3>Google Drive path problems on macOS</h3>
+<p>If the repo lives in Google Drive and launchd jobs cannot read files, grant Full Disk Access to the shell used by the wrapper, usually Terminal, zsh, bash, or the automation runner.</p>
+<hr />
+<h2>14. Commands Reference</h2>
+<pre><code class="language-bash"># Full flow
+python -m agents.run_ngo_pipeline --csv &quot;data/inputs/my_ngos.csv&quot;
+python -m agents.run_ngo_pipeline --csv &quot;data/inputs/my_ngos.csv&quot; --dry-run
 
-  <!-- ── DATA FLOW ─────────────────────────────────────────────────────────── -->
-  <section>
-    <h2>Pipeline Data Flow</h2>
+# Score and rank
+python -m agents.ngo_partner_agent --csv &quot;data/inputs/my_ngos.csv&quot;
+python -m agents.ngo_partner_agent --csv &quot;data/inputs/my_ngos.csv&quot; --min-score 6 --top 25
+python -m agents.ngo_partner_agent --csv &quot;data/inputs/my_ngos.csv&quot; --append
 
-    <div class="flow-legend">
-      <div class="flow-legend-item"><div class="flow-legend-dot" style="background:var(--node-input-border)"></div> Input / file</div>
-      <div class="flow-legend-item"><div class="flow-legend-dot" style="background:var(--node-auto-border)"></div> Automated agent</div>
-      <div class="flow-legend-item"><div class="flow-legend-dot" style="background:var(--node-manual-border)"></div> Manual step</div>
-      <div class="flow-legend-item"><div class="flow-legend-dot" style="background:var(--node-parallel-border)"></div> Parallel track</div>
-    </div>
+# Enrich
+python -m agents.ngo_enrichment_agent
+python -m agents.ngo_enrichment_agent --input &quot;data/ngo_partnerships/ngo_ranked.csv&quot; --limit 10
 
-    <div class="flow-diagram">
-      <div class="pipeline">
+# Copywrite
+python -m agents.ngo_copywriter_agent
+python -m agents.ngo_copywriter_agent --dry-run --limit 5
+python -m agents.ngo_copywriter_agent --campaign-id &quot;NGOs_DDMMYYYY_Topic&quot;
 
-        <!-- Two parallel tracks side by side -->
-        <div class="parallel-wrap">
+# Upload
+python -m agents.notion_import_ngos --csv &quot;data/ngo_partnerships/ngo_outreach.csv&quot;
+python -m agents.notion_import_ngos --csv &quot;data/ngo_partnerships/ngo_outreach.csv&quot; --dry-run --limit 5
 
-          <!-- MAIN TRACK -->
-          <div class="parallel-col">
-            <div class="parallel-label">Main campaign track</div>
-
-            <div class="node node-input"><span class="node-title">Source CSV</span><span class="node-sub">NGO.base scrape or other</span></div>
-            <div class="mini-vline"></div>
-            <div class="arrow-down" style="margin-left:49px"></div>
-
-            <div class="node node-auto"><span class="node-title">ngo_partner_agent</span><span class="node-sub">GPT-4o · batch of 5 · score 0–10</span></div>
-            <div class="mini-vline"></div>
-            <div class="arrow-down" style="margin-left:49px"></div>
-
-            <div class="node node-file"><span class="node-title">ngo_ranked.csv</span><span class="node-sub">scored + AI angle · filtered by min-score</span></div>
-            <div class="mini-vline"></div>
-            <div class="arrow-down" style="margin-left:49px"></div>
-
-            <div class="node node-auto"><span class="node-title">ngo_enrichment_agent</span><span class="node-sub">crawls 8 pages · extracts contact + email</span></div>
-            <div class="mini-vline"></div>
-            <div class="arrow-down" style="margin-left:49px"></div>
-
-            <div class="node node-file"><span class="node-title">ngo_enriched.csv</span><span class="node-sub">+ contact_name · email · confidence</span></div>
-            <div class="mini-vline"></div>
-            <div class="arrow-down" style="margin-left:49px"></div>
-
-            <div class="node node-auto"><span class="node-title">ngo_copywriter_agent</span><span class="node-sub">German RRR email per NGO</span></div>
-            <div class="mini-vline"></div>
-            <div class="arrow-down" style="margin-left:49px"></div>
-
-            <div class="node node-file"><span class="node-title">ngo_outreach.csv</span><span class="node-sub">subject + body · sender assigned</span></div>
-            <div class="mini-vline"></div>
-            <div class="arrow-down" style="margin-left:49px"></div>
-
-            <div class="node node-auto"><span class="node-title">notion_import_ngos</span><span class="node-sub">dedup → Accounts + Contacts</span></div>
-            <div class="mini-vline"></div>
-            <div class="arrow-down" style="margin-left:49px"></div>
-
-            <div class="node node-manual"><span class="node-title">Send emails</span><span class="node-sub">manual via own email client</span></div>
-          </div>
-
-          <div class="parallel-divider"></div>
-
-          <!-- PROJECT APPLICATIONS TRACK -->
-          <div class="parallel-col">
-            <div class="parallel-label">Project applications track</div>
-
-            <div class="node node-parallel"><span class="node-title">Tally form responses</span><span class="node-sub">land in Notion Requirements DB automatically</span></div>
-            <div class="mini-vline"></div>
-            <div class="arrow-down" style="margin-left:49px"></div>
-
-            <div class="node node-parallel"><span class="node-title">requirements_analyzer</span><span class="node-sub">GPT-4o GTM analysis per applicant</span></div>
-            <div class="mini-vline"></div>
-            <div class="arrow-down" style="margin-left:49px"></div>
-
-            <div class="node node-parallel"><span class="node-title">enrich_requirements</span><span class="node-sub">account + product owner matching</span></div>
-            <div class="mini-vline"></div>
-            <div class="arrow-down" style="margin-left:49px"></div>
-
-            <div class="node node-parallel"><span class="node-title">Notion Accounts</span><span class="node-sub">account + contact links written back</span></div>
-          </div>
-
-        </div><!-- /parallel-wrap -->
-      </div><!-- /pipeline -->
-    </div><!-- /flow-diagram -->
-
-    <p class="note" style="margin-top:16px;"><strong>Resume tip:</strong> Enrichment writes <code>enrichment_progress.json</code> after each NGO. If a run fails midway, restart with <code>--start-from N</code> to skip already-processed orgs.</p>
-  </section>
-
-  <!-- ── SCORING WEIGHTS ───────────────────────────────────────────────────── -->
-  <section>
-    <h2>Scoring Weights &amp; Parameters</h2>
-
-    <p>GPT-4o scores each sub-criterion 0–10, then the agent computes the weighted total:</p>
-    <pre><code>total_score = 0.35 × size_score + 0.35 × mission_score + 0.30 × establishment_score</code></pre>
-
-    <div class="score-bars">
-      <div class="score-bar">
-        <div class="score-bar-label">Size / Impact</div>
-        <div class="score-bar-track"><div class="score-bar-fill" style="width:35%"></div></div>
-        <div class="score-bar-pct">35%</div>
-      </div>
-      <div class="score-bar">
-        <div class="score-bar-label">Mission + AI Applicability</div>
-        <div class="score-bar-track"><div class="score-bar-fill" style="width:35%"></div></div>
-        <div class="score-bar-pct">35%</div>
-      </div>
-      <div class="score-bar">
-        <div class="score-bar-label">Establishment / Track Record</div>
-        <div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div>
-        <div class="score-bar-pct">30%</div>
-      </div>
-    </div>
-
-    <div class="two-col" style="margin-top:14px;">
-      <div class="param-box">
-        <h4>ngo_partner_agent.py</h4>
-        <table>
-          <tr><th>Parameter</th><th>Value</th></tr>
-          <tr><td>Model</td><td><code>gpt-4o</code></td></tr>
-          <tr><td>Batch size</td><td>5 NGOs per API call</td></tr>
-          <tr><td>Default min score</td><td><code>--min-score 6</code></td></tr>
-          <tr><td>Default top-N</td><td><code>--top 25</code></td></tr>
-          <tr><td>Output</td><td><code>BatchAssessment</code> Pydantic (structured output)</td></tr>
-          <tr><td>Extra fields</td><td><code>estimated_founding_year</code>, <code>estimated_employees</code>, <code>has_dzi_seal</code>, <code>ai_partnership_angle</code></td></tr>
-        </table>
-      </div>
-      <div class="param-box">
-        <h4>ngo_enrichment_agent.py</h4>
-        <table>
-          <tr><th>Parameter</th><th>Value</th></tr>
-          <tr><td>Request timeout</td><td><code>REQUEST_TIMEOUT = 15</code> s</td></tr>
-          <tr><td>Delay between fetches</td><td><code>FETCH_DELAY = 1.0</code> s</td></tr>
-          <tr><td>Max content per page</td><td>First 5 000 chars of stripped HTML</td></tr>
-          <tr><td>Progress checkpoint</td><td><code>enrichment_progress.json</code></td></tr>
-          <tr><td>Contact preference</td><td>Senior decision-makers first; press/fundraising only as fallback</td></tr>
-        </table>
-        <h4>ngo_copywriter_agent.py</h4>
-        <table>
-          <tr><th>Parameter</th><th>Value</th></tr>
-          <tr><td>Language</td><td>German throughout</td></tr>
-          <tr><td>Length</td><td>90–150 words ideal · hard max 170</td></tr>
-          <tr><td>Default owners</td><td><code>["Carlo Renner", "Lisa Gavrilova"]</code> — rotates by rank index</td></tr>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── SCORING ANCHORS ───────────────────────────────────────────────────── -->
-  <section>
-    <h2>Scoring Anchors (what earns each score)</h2>
-    <p>The <code>SYSTEM_PROMPT</code> in <code>ngo_partner_agent.py</code> gives GPT-4o explicit examples to calibrate against. Adding concrete German NGO names improves calibration noticeably.</p>
-
-    <div class="two-col">
-      <div>
-        <h3>Size / Impact</h3>
-        <table>
-          <thead><tr><th>Score</th><th>Profile</th></tr></thead>
-          <tbody>
-            <tr><td><span class="tag tag-green">9–10</span></td><td>Major national org — thousands of staff, hundreds of millions € budget (DRK, Caritas, Diakonie)</td></tr>
-            <tr><td><span class="tag tag-green">7–8</span></td><td>Large regional / well-known national — hundreds of staff (Greenpeace DE, AWO, Amnesty DE)</td></tr>
-            <tr><td><span class="tag tag-yellow">5–6</span></td><td>Medium-sized established regional — dozens of staff</td></tr>
-            <tr><td><span class="tag tag-yellow">3–4</span></td><td>Small but operational — handful of staff</td></tr>
-            <tr><td><span class="tag tag-gray">1–2</span></td><td>Very small / volunteer-only</td></tr>
-            <tr><td><span class="tag tag-gray">0</span></td><td>Cannot determine / dead website</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div>
-        <h3>Mission + AI Applicability</h3>
-        <table>
-          <thead><tr><th>Score</th><th>Profile</th></tr></thead>
-          <tbody>
-            <tr><td><span class="tag tag-green">9–10</span></td><td>Transformative AI potential — mental health chatbots, disaster prediction, accessibility tech, triage automation</td></tr>
-            <tr><td><span class="tag tag-green">7–8</span></td><td>Strong social mission + clear AI use cases (reporting, matching, knowledge management)</td></tr>
-            <tr><td><span class="tag tag-yellow">5–6</span></td><td>Good mission, some AI potential but less obvious</td></tr>
-            <tr><td><span class="tag tag-yellow">3–4</span></td><td>Standard mission, limited AI angle</td></tr>
-            <tr><td><span class="tag tag-gray">1–2</span></td><td>Very niche / unclear mission</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <h3>Establishment / Track Record</h3>
-    <p style="font-size:13px;">GPT-4o cross-references <strong>Vereinsregister</strong> (founding dates), <strong>DZI-Spendensiegel</strong> (trust seal), and <strong>Deutscher Spendenrat</strong> membership from training data. Unknown German NGOs default to <em>low</em>, not medium.</p>
-    <table>
-      <thead><tr><th>Score</th><th>Criteria</th></tr></thead>
-      <tbody>
-        <tr><td><span class="tag tag-green">9–10</span></td><td>50+ years, DZI seal holder, well-known institution</td></tr>
-        <tr><td><span class="tag tag-green">7–8</span></td><td>20–50 years, solid reputation</td></tr>
-        <tr><td><span class="tag tag-yellow">5–6</span></td><td>10–20 years, established</td></tr>
-        <tr><td><span class="tag tag-yellow">3–4</span></td><td>5–10 years</td></tr>
-        <tr><td><span class="tag tag-gray">1–2</span></td><td>Under 5 years or unclear history</td></tr>
-        <tr><td><span class="tag tag-gray">0</span></td><td>Cannot determine</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- ── ENRICHMENT CRAWL STRATEGY ─────────────────────────────────────────── -->
-  <section>
-    <h2>Enrichment Crawl Strategy</h2>
-    <p>The agent starts from the NGO homepage, discovers internal links, and fetches them in priority order. Defined in <code>TARGET_PAGES</code> in <code>ngo_enrichment_agent.py</code>:</p>
-    <table>
-      <thead><tr><th>#</th><th>Page type</th><th>URL keyword patterns searched</th></tr></thead>
-      <tbody>
-        <tr><td>1</td><td>Impressum</td><td><code>impressum</code>, <code>imprint</code>, <code>legal</code></td></tr>
-        <tr><td>2</td><td>About</td><td><code>ueber-uns</code>, <code>über uns</code>, <code>about-us</code>, <code>wer-wir-sind</code></td></tr>
-        <tr><td>3</td><td>Team / Staff</td><td><code>team</code>, <code>unser-team</code>, <code>staff</code>, <code>mitarbeiter</code></td></tr>
-        <tr><td>4</td><td>Leadership / Board</td><td><code>vorstand</code>, <code>leadership</code>, <code>geschäftsführung</code>, <code>gremien</code></td></tr>
-        <tr><td>5</td><td>Contact</td><td><code>kontakt</code>, <code>contact</code>, <code>ansprechpartner</code></td></tr>
-        <tr><td>6</td><td>Digital / Innovation</td><td><code>digital</code>, <code>innovation</code>, <code>technologie</code></td></tr>
-        <tr><td>7</td><td>Org structure</td><td><code>organisation</code>, <code>struktur</code>, <code>organigramm</code></td></tr>
-      </tbody>
-    </table>
-    <p>For each page, agent fetches first 5 000 chars of stripped body text → GPT-4o structured extraction → <code>ContactExtraction</code> Pydantic with <code>contact_name</code>, <code>contact_role</code>, <code>contact_email</code>, <code>email_confidence (0–10)</code>, <code>contact_notes</code>.</p>
-  </section>
-
-  <!-- ── COPYWRITER RULES ───────────────────────────────────────────────────── -->
-  <section>
-    <h2>German Copywriter Rules</h2>
-    <p>The full brief is <code>SYSTEM_PROMPT_TEMPLATE</code> in <code>ngo_copywriter_agent.py</code>. Key rules at a glance:</p>
-
-    <h3>RRR structure (mandatory)</h3>
-    <table>
-      <thead><tr><th>Para</th><th>Content</th><th>Key constraint</th></tr></thead>
-      <tbody>
-        <tr><td>1</td><td>Greeting + intro (sender, TUM Social AI) + appreciation for their work area</td><td>Exactly ONE appreciation sentence. Use "sehr inspirierend!" as default phrase. Never "äußerst", "umfangreich", "von unschätzbarem Wert".</td></tr>
-        <tr><td>2</td><td>What TUM Social AI does for nonprofits</td><td>One sentence covering both internal AI (processes, reporting) and mission-related AI support.</td></tr>
-        <tr><td>3</td><td>Personalized AI angle + openness to hear real challenges</td><td>AI angle = example only ("könnte zum Beispiel"). Then explicitly invite them to share their actual bottlenecks.</td></tr>
-        <tr><td>4</td><td>CTA + forwarding invite + closing</td><td>"Hätten Sie Interesse an einem kurzen 20-minütigen Austausch?" Invite forwarding to IT/Digitalisierung/Innovation. Close: "Beste Grüße," then sender first name on next line.</td></tr>
-      </tbody>
-    </table>
-
-    <h3>Subject line format</h3>
-    <pre><code>TUM Social AI <> [NGO short name]: Pro-bono KI [optional 1-2 word German angle]
-
-Examples:
-  TUM Social AI <> WWF: Pro-bono KI Artenschutz
-  TUM Social AI <> Caritas Köln: Pro-bono KI
-  TUM Social AI <> IOM Germany: Pro-bono KI Integration</code></pre>
-
-    <h3>Style guardrails</h3>
-    <ul>
-      <li><strong>Never use:</strong> "revolutionieren", "disrupten", "bahnbrechend", "Gamechanger", em dashes (—), en dashes (–).</li>
-      <li>Never claim TUM Social AI already worked with this specific NGO unless confirmed.</li>
-      <li>Never make up facts not present in the input data.</li>
-      <li>If no contact person → <code>Liebes Team von [NGO Name],</code> · Never "Sehr geehrte Damen und Herren".</li>
-    </ul>
-
-    <h3>Sender assignment</h3>
-    <p>Even-index ranks (1, 3, 5…) → owner 0 · Odd-index (2, 4, 6…) → owner 1. Edit <code>NGO_OWNERS</code> list in <code>ngo_copywriter_agent.py</code> line 177 to change default owners or add a third sender.</p>
-  </section>
-
-  <!-- ── HOW TO MAKE CHANGES ───────────────────────────────────────────────── -->
-  <section>
-    <h2>How to Make Changes</h2>
-    <p>Always test with <code>--dry-run --limit 5</code> first. For prompt changes, read 5 generated emails in German before launching a live campaign.</p>
-
-    <h3>Change scoring weights</h3>
-    <p>Find the formula in <code>ngo_partner_agent.py</code> (search <code>0.35</code>) and adjust multipliers — they must sum to 1.0:</p>
-    <pre><code># e.g. weight mission more heavily for a mission-specific campaign
-total_score = 0.25 * size_score + 0.50 * mission_score + 0.25 * establishment_score</code></pre>
-
-    <h3>Change the qualification threshold or shortlist size</h3>
-    <p>These are CLI flags — no code change needed:</p>
-    <pre><code>python -m agents.ngo_partner_agent --csv my.csv --min-score 5 --top 40</code></pre>
-
-    <h3>Change scoring anchor points</h3>
-    <p>Edit the bullet-point score guides in <code>SYSTEM_PROMPT</code> in <code>ngo_partner_agent.py</code>. Adding concrete German NGO names as calibration examples reliably improves score quality.</p>
-
-    <h3>Add or reorder enrichment pages</h3>
-    <p>Edit <code>TARGET_PAGES</code> in <code>ngo_enrichment_agent.py</code> (line 63). Each entry is a tuple of keyword patterns + page label. Move a tuple earlier in the list to raise its priority.</p>
-
-    <h3>Change crawl timeout or delay</h3>
-    <pre><code># ngo_enrichment_agent.py
-REQUEST_TIMEOUT = 15   # seconds per request
-FETCH_DELAY = 1.0      # seconds between requests — don't go below 0.5</code></pre>
-
-    <h3>Resume a failed enrichment run</h3>
-    <pre><code>python -m agents.ngo_enrichment_agent --start-from 20  # skips first 20 already done</code></pre>
-
-    <h3>Change email copy style or tone</h3>
-    <p>Edit <code>SYSTEM_PROMPT_TEMPLATE</code> in <code>ngo_copywriter_agent.py</code>. Most-changed sections: <strong>STYLE RULES</strong> (banned words, tone), <strong>Email structure</strong> (paragraph constraints), <strong>SUBJECT LINE RULES</strong>.</p>
-
-    <h3>Change email length limits</h3>
-    <p>Edit the Pydantic field <code>description</code> strings in <code>class NGOEmail</code> in <code>ngo_copywriter_agent.py</code>.</p>
-
-    <h3>Add a sender / change default owners</h3>
-    <p>Edit <code>NGO_OWNERS</code> list (line 177). A 3-person list gives ~33/33/33 split. Pass <code>--sender "Name"</code> at runtime to override for a specific run.</p>
-
-    <h3>Add a new prospect source beyond NGO.base</h3>
-    <ol>
-      <li>Export from source (DZI, GlobalGiving, EU Transparency Register, etc.).</li>
-      <li>Map columns: <code>ngo_name</code>, <code>col href</code>, <code>work_area</code>, <code>sub_work_area</code>, <code>listing_locations</code>.</li>
-      <li>Save to <code>data/inputs/</code> with a descriptive filename.</li>
-      <li>Run <code>--dry-run</code>. If scores look miscalibrated, add sample orgs from that source as scoring examples in the prompt.</li>
-    </ol>
-
-    <h3>Improve email quality via the learnings loop</h3>
-    <p>Add weak examples + improved versions to the Notion Copywriter Improvement Log (bad snippet / improved / reason / context). Distill processed learnings into <code>data/prompts/outreach_learnings.md</code> — auto-injected every run.</p>
-    <p class="note"><strong>Common failure patterns:</strong> two appreciation sentences instead of one · AI angle stated as certainty not example · body over 170 words · subject line over 10 words · "revolutionieren" or "disruptiv" anywhere · "Sehr geehrte Damen und Herren".</p>
-  </section>
-
-  <!-- ── COST REFERENCE ────────────────────────────────────────────────────── -->
-  <section>
-    <h2>API Cost Reference</h2>
-    <p>All calls logged to <code>data/logs/api_usage.jsonl</code> via <code>utils/api_logger.py</code>.</p>
-    <table>
-      <thead><tr><th>Operation</th><th>Model</th><th>Typical cost</th></tr></thead>
-      <tbody>
-        <tr><td>Score 50 NGOs (batches of 5)</td><td>gpt-4o</td><td>~$0.15–0.25</td></tr>
-        <tr><td>Enrich 25 NGOs (crawl + extract)</td><td>gpt-4o</td><td>~$0.30–0.60</td></tr>
-        <tr><td>Copywrite 25 emails</td><td>gpt-4o</td><td>~$0.20–0.40</td></tr>
-        <tr><td>Project applications (10 apps)</td><td>gpt-4o</td><td>~$0.10–0.20</td></tr>
-        <tr><td>Building / modifying agents</td><td>varies</td><td>10–50× higher than running agents</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-</main>
+# Project applications
+cd project-applications
+python requirements_analyzer.py
+python enrich_requirements.py
+python enrich_requirements.py --dry-run
+</code></pre>
+<hr />
+<h2>15. Test Plan</h2>
+<p>Use this checklist after changing the infrastructure:</p>
+<ul>
+<li>Run static/syntax checks for changed Python files: <code>python -m compileall agents utils project-applications</code>.</li>
+<li>Dry-run available runner commands:</li>
+<li><code>python -m agents.run_ngo_pipeline --csv "data/ngo_partnerships/NGOs_Health_Environment_Animals_DE_12032026.csv" --dry-run</code></li>
+<li><code>python -m agents.notion_import_ngos --csv "data/ngo_partnerships/ngo_outreach.csv" --dry-run --limit 1</code></li>
+<li><code>python -m agents.ngo_copywriter_agent --dry-run --limit 1</code></li>
+<li>If a rank-only dry-run is added later, run it before broad scoring. Today <code>ngo_partner_agent</code> does not expose <code>--dry-run</code>.</li>
+<li>This repo does not currently expose <code>agent.py rank/upload/copywrite/linkedin</code> commands; use the module commands above.</li>
+<li>Verify disabled launchd campaign jobs no longer appear as active scheduled jobs.</li>
+<li>Verify kept intake jobs still have valid wrappers and logs.</li>
+<li>Verify Notion page/database creation by reading the resulting page blocks after creation.</li>
+<li>Open <code>ONBOARDING.html</code> locally and confirm the layout is readable and does not contain outdated fixed campaign framing.</li>
+</ul>
 </body>
 </html>
