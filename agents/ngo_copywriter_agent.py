@@ -36,6 +36,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCo
 
 from utils.config import OPENAI_API_KEY, DATA_DIR
 from utils.api_logger import log_api_usage
+from utils.copywriting_guidance import load_humanized_guidance
 
 console = Console()
 
@@ -196,7 +197,7 @@ def build_system_prompt(sender_name: str) -> str:
     """Render the system prompt template for a specific sender."""
     first_name = sender_name.split()[0]
     prompt = SYSTEM_PROMPT_TEMPLATE.replace("{SENDER_NAME}", sender_name).replace("{SENDER_FIRST_NAME}", first_name)
-    return prompt + load_outreach_learnings()
+    return prompt + load_outreach_learnings() + load_humanized_guidance("Social Partnerships")
 
 
 # ---------------------------------------------------------------------------
@@ -243,6 +244,39 @@ def build_ngo_prompt(ngo: dict) -> str:
     return "\n".join(lines)
 
 
+def validate_ngo_email(email: NGOEmail) -> list[str]:
+    """Return quality issues for German NGO outreach."""
+    issues = []
+    combined = f"{email.email_subject}\n{email.email_body}"
+    lowered = combined.lower()
+
+    if "—" in combined or "–" in combined or " -- " in combined:
+        issues.append("contains an em/en dash or double-hyphen aside")
+    for phrase in [
+        "sehr geehrte damen und herren",
+        "äußerst",
+        "umfangreiche arbeit",
+        "von unschätzbarem wert",
+        "revolutionieren",
+        "disrupten",
+        "bahnbrechend",
+        "gamechanger",
+        "innovativ",
+        "wertvoll",
+    ]:
+        if phrase in lowered:
+            issues.append(f"contains stiff or AI-coded phrase: {phrase}")
+    if "dürfen wir" in lowered and "termin" in lowered:
+        issues.append("CTA is too formal/pressure-heavy; use the lighter 20-minute exchange ask")
+    if "hätten sie interesse an einem kurzen 20-minütigen austausch" not in lowered:
+        issues.append("CTA should use the approved low-friction 20-minute exchange wording")
+    if "missionbezogen" in lowered:
+        issues.append("uses misspelling missionbezogen; use missionsbezogen")
+    if len(email.email_body.split()) > 170:
+        issues.append("email body is over 170 words")
+
+    return issues
+
 # ---------------------------------------------------------------------------
 # Email generation
 # ---------------------------------------------------------------------------
@@ -252,25 +286,49 @@ def generate_email(client: OpenAI, ngo: dict, sender_name: str = "Carlo Renner")
     user_prompt = build_ngo_prompt(ngo)
     system_prompt = build_system_prompt(sender_name)
 
-    response = client.beta.chat.completions.parse(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        response_format=NGOEmail,
-        max_tokens=1000,
-    )
+    last_result = None
+    last_usage = None
+    quality_feedback = ""
+    for attempt in range(1, 4):
+        response = client.beta.chat.completions.parse(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt + quality_feedback},
+            ],
+            response_format=NGOEmail,
+            max_tokens=1000,
+        )
+        result = response.choices[0].message.parsed
+        last_result = result
+        last_usage = response.usage
+        issues = validate_ngo_email(result)
+        if not issues:
+            break
+        quality_feedback = (
+            "\n\n## QUALITY GATE FAILED\n"
+            "Rewrite the subject and body before returning final copy. Fix:\n"
+            + "\n".join(f"- {issue}" for issue in issues)
+            + "\nKeep the German natural, specific, modest, and nonprofit-sensitive."
+        )
+        console.print(f"  [yellow]Quality retry {attempt}/3: {len(issues)} issue(s)[/yellow]")
+
+    if last_result is None:
+        raise RuntimeError("OpenAI returned no NGO email")
 
     log_api_usage(
         agent="ngo_copywriter_agent",
         action="email_generation",
         model="gpt-4o",
-        usage=response.usage,
+        usage=last_usage,
         metadata={"ngo_name": ngo.get("ngo_name", "")},
     )
 
-    return response.choices[0].message.parsed
+    final_issues = validate_ngo_email(last_result)
+    if final_issues:
+        raise ValueError("Generated NGO email failed quality gate: " + "; ".join(final_issues))
+
+    return last_result
 
 
 # ---------------------------------------------------------------------------
