@@ -200,7 +200,7 @@ def create_account(org_name: str) -> Optional[dict]:
         "parent": {"database_id": ACCOUNTS_DB_ID},
         "properties": {
             "Organization*": {"title": [{"text": {"content": org_name}}]},
-            "Account Type*": {"select": {"name": "NGO"}},
+            "Account Type*": {"select": {"name": "nonprofit"}},
             "Status": {"status": {"name": "Prospect Qualified"}},
         },
     }

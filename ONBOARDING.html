@@ -441,7 +441,7 @@
 <tr><td><code>work_area</code></td><td style="text-align:right">Strongly recommended</td><td>Main mission category, used for scoring and campaign ID mission naming.</td></tr>
 <tr><td><code>sub_work_area</code></td><td style="text-align:right">Helpful</td><td>More specific mission category, improves personalization.</td></tr>
 <tr><td><code>listing_locations</code></td><td style="text-align:right">Helpful</td><td>Country, city, or region, used for relevance and filtering.</td></tr>
-<tr><td><code>account_type</code></td><td style="text-align:right">Optional</td><td>Defaults to NGO/nonprofit if missing.</td></tr>
+<tr><td><code>account_type</code></td><td style="text-align:right">Optional</td><td>Defaults to <code>nonprofit</code>; legacy <code>NGO</code> values are mapped to <code>nonprofit</code> during Notion import.</td></tr>
 </tbody>
 </table>
 <p>The current pipeline was built around NGO.base exports, so it expects NGO.base-style column names. If another source uses different headers, rename them before running the agents or ask Codex to normalize the CSV.</p>

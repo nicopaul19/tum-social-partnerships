@@ -7,14 +7,16 @@ The system is not a fixed weekly campaign machine. Campaign actions are run when
 ## Quick Start
 
 ```bash
-git clone https://github.com/tumsocialai/social-partnerships.git
-cd social-partnerships
+git clone https://github.com/nicopaul19/tum-social-partnerships.git
+cd tum-social-partnerships
 python3 -m venv venv
 source venv/bin/activate   # Windows PowerShell: .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 cp .env.template .env
 python -m agents.run_ngo_pipeline --help
 ```
+
+If an older onboarding page points to `github.com/tumsocialai/social-partnerships.git`, use the `nicopaul19/tum-social-partnerships` URL above. The old org URL currently returns `Repository not found`.
 
 ## Main Commands
 
@@ -51,7 +53,7 @@ The NGO sourcing agents need a source CSV before they can start. The current saf
 | `work_area` | Strongly recommended | Main mission category for scoring and campaign naming. |
 | `sub_work_area` | Helpful | More specific mission context for personalization. |
 | `listing_locations` | Helpful | Region/country/city relevance. |
-| `account_type` | Optional | Defaults to NGO/nonprofit behavior if missing. |
+| `account_type` | Optional | Defaults to `nonprofit`; legacy `NGO` values are mapped to `nonprofit` during Notion import. |
 
 The current acquisition workflow is: scrape NGO.base by category and region with the Instant Data Scraper Chrome extension, export CSV, save it in `data/inputs/`, normalize headers if needed, then run a dry run.
 

@@ -51,13 +51,21 @@ from utils.config import NOTION_TOKEN, NOTION_DB_ACCOUNTS_ID, OPENAI_API_KEY
 
 console = Console()
 
+DEFAULT_ACCOUNT_TYPE = "nonprofit"
+ACCOUNT_TYPE_ALIASES = {
+    "ngo": DEFAULT_ACCOUNT_TYPE,
+    "non profit": DEFAULT_ACCOUNT_TYPE,
+    "non-profit": DEFAULT_ACCOUNT_TYPE,
+}
+
 # ---------------------------------------------------------------------------
 # Sender → Notion user ID mapping
 # Add new senders here; the copywriter assigns these names via NGO_OWNERS.
 # ---------------------------------------------------------------------------
 OWNER_IDS: dict[str, str] = {
-    "Carlo Renner":   "2c5d872b-594c-81ca-abfc-00023d45afd3",
-    "Lisa Gavrilova": "328d872b-594c-8133-8a1f-00020ea856a1",
+    "Carlo Renner":    "2c5d872b-594c-81ca-abfc-00023d45afd3",
+    "Lisa Gavrilova":  "328d872b-594c-8133-8a1f-00020ea856a1",
+    "Florian Lichius": "a6894add-55e8-481c-8c25-39760d7e7593",
 }
 
 # Notion API config
@@ -79,6 +87,14 @@ def clean_value(val) -> str:
     if isinstance(val, float) and (math.isnan(val) or math.isinf(val)):
         return ""
     return str(val).strip()
+
+
+def normalize_account_type(raw) -> str:
+    """Map legacy account type values to the current Notion select options."""
+    value = clean_value(raw)
+    if not value:
+        return DEFAULT_ACCOUNT_TYPE
+    return ACCOUNT_TYPE_ALIASES.get(value.lower(), value)
 
 
 def normalize_domain(url: str) -> str:
@@ -232,7 +248,7 @@ def create_account(row: dict) -> Optional[str]:
     website = normalize_url(clean_value(row.get("col href", "")))
     city = clean_value(row.get("listing_locations", ""))
     work_area = clean_value(row.get("work_area", ""))
-    account_type = clean_value(row.get("account_type", "NGO"))
+    account_type = normalize_account_type(row.get("account_type", DEFAULT_ACCOUNT_TYPE))
     campaign_id = clean_value(row.get("campaign_id", ""))
     mission = build_mission_text(row)
     ai_angle = clean_value(row.get("ai_partnership_angle", ""))
@@ -410,7 +426,7 @@ def update_account(page_id: str, row: dict) -> bool:
         "Website URL*": ("url", normalize_url(clean_value(row.get("col href", "")))),
         "City": ("select", clean_value(row.get("listing_locations", ""))),
         "Work Area NGO": ("select", clean_value(row.get("work_area", ""))),
-        "Account Type*": ("select", clean_value(row.get("account_type", "NGO"))),
+        "Account Type*": ("select", normalize_account_type(row.get("account_type", DEFAULT_ACCOUNT_TYPE))),
         "Mission*": ("rich_text", build_mission_text(row)),
         "[Suspect] Contact Name": ("rich_text", clean_value(row.get("selected_contact_name", ""))),
         "[Suspect] Job Title": ("rich_text", clean_value(row.get("selected_contact_role", ""))),

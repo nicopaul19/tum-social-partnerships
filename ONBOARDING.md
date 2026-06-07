@@ -60,7 +60,7 @@ For the NGO sourcing pipeline, the safest input is a CSV with one row per organi
 | `work_area` | Strongly recommended | Main mission category, used for scoring and campaign ID mission naming. |
 | `sub_work_area` | Helpful | More specific mission category, improves personalization. |
 | `listing_locations` | Helpful | Country, city, or region, used for relevance and filtering. |
-| `account_type` | Optional | Defaults to NGO/nonprofit if missing. |
+| `account_type` | Optional | Defaults to `nonprofit`; legacy `NGO` values are mapped to `nonprofit` during Notion import. |
 
 The current pipeline was built around NGO.base exports, so it expects NGO.base-style column names. If another source uses different headers, rename them before running the agents or ask Codex to normalize the CSV.
 

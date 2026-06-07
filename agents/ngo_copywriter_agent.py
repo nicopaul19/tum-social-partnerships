@@ -419,7 +419,7 @@ def run_copywriter(dry_run: bool = False, limit: int = 0, start_from: int = 1,
 
                 results.append({
                     **ngo,
-                    "account_type": "NGO",
+                    "account_type": "nonprofit",
                     "owner": sender_name,
                     "campaign_id": campaign_id,
                     "email_subject": email.email_subject,
@@ -433,7 +433,7 @@ def run_copywriter(dry_run: bool = False, limit: int = 0, start_from: int = 1,
                 errors += 1
                 results.append({
                     **ngo,
-                    "account_type": "NGO",
+                    "account_type": "nonprofit",
                     "campaign_id": campaign_id,
                     "email_subject": "",
                     "email_body": "",
