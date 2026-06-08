@@ -40,7 +40,10 @@ If an older onboarding page points to `github.com/tumsocialai/social-partnership
 | `ngo_enrichment_agent` | Website crawl of homepage, impressum, about, team, leadership, contact, digital, and innovation pages; then structured decision-maker extraction. |
 | `ngo_copywriter_agent` | German RRR outreach prompt: relevance, reward, request, nonprofit-sensitive tone, no invented facts, 20-minute CTA, sender-specific sign-off. |
 | `notion_import_ngos` | Domain/name deduplication and CSV-to-Notion mapping for Accounts, campaign fields, suspected contacts, and outreach copy. |
+| `campaign_tracker` | Shared Campaign Tracker sync from social partnership campaign Accounts: creates/updates the campaign entry, relates it to targeted Accounts, and stores trigger, target audience, targeting reasoning, and performance placeholders. |
 | Project applications intake | AI GTM analysis of Project Requirements plus Account/Product Owner linking into Notion. |
+
+Campaign tracking rule: setting `Campaign ID` on Accounts is only the first half of campaign creation. Every social partnership campaign must also have a Campaign Tracker database entry, related back to all targeted Accounts, with trigger, target audience, targeting reasoning, outreach summary, and A/B/performance fields. The NGO Notion import syncs this automatically; after manual CRM edits, rerun the import in dry-run first, then apply the repaired campaign sync or ask Codex to run the Campaign Tracker sync.
 
 ## Input Requirements
 
@@ -63,7 +66,7 @@ Other source options still worth exploring: DZI, EU Transparency Register, Counc
 
 - Python 3.9+
 - OpenAI API key
-- Notion integration token with access to Accounts and Contacts databases
+- Notion integration token with access to Accounts, Contacts, and Campaign Tracker databases
 - `NOTION_DB_REQUIREMENTS_ID` for the project applications flow
 - Optional Gmail app password for completion reports
 - Codex, Claude Code, Antigravity, or a normal terminal
@@ -77,6 +80,7 @@ OPENAI_API_KEY=
 NOTION_TOKEN=
 NOTION_DB_ACCOUNTS_ID=
 NOTION_DB_CONTACTS_ID=
+NOTION_DB_CAMPAIGNS_ID=
 NOTION_DB_REQUIREMENTS_ID=
 GMAIL_ADDRESS=
 GMAIL_APP_PASSWORD=

@@ -29,7 +29,14 @@ There is also a project-applications intake flow for organizations that already 
 | `ngo_enrichment_agent` | Finds the best partnership contact and best available email. | Crawls the organization's homepage and likely subpages such as `impressum`, `about`, `team`, `leadership`, `contact`, `digital`, and `innovation`. It prefers senior decision-makers for small/mid-sized nonprofits, then digital/IT/innovation/partnerships leads for larger organizations. It avoids press, fundraising, volunteer, and generic office contacts unless nothing better exists. |
 | `ngo_copywriter_agent` | Generates German outreach drafts for the campaign sender. | Uses the RRR structure: relevance, reward, request. The prompt enforces German language, short paragraphs, nonprofit-sensitive tone, no hype, no hallucinated facts, a low-friction 20-minute CTA, and sender-specific sign-off. Processed learnings from `data/prompts/outreach_learnings.md` are injected into future runs. |
 | `notion_import_ngos` | Uploads reviewed campaign rows into Notion Accounts and contact-related fields. | Deduplicates by normalized domain and organization name. Maps CSV fields into Notion properties such as organization, website, city, work area, mission, campaign ID, lead score, estimated employees, suspect contact, email subject/body, and AI partnership angle. |
+| `campaign_tracker` | Maintains the shared Notion Campaign Tracker entry for every social partnership campaign. | The NGO Notion import creates or updates one Campaign Tracker page per `Campaign ID`, relates it back to the targeted Accounts, and records trigger, target audience, targeting reasoning, outreach summary, and performance placeholders for later feedback analysis. |
 | Project applications intake | Processes nonprofits that applied through the Project Requirements flow. | `requirements_analyzer.py` acts as an AI GTM + forward-deployed-engineering reviewer. It reads problem statement, current effort, usage frequency, benefits, data readiness, data language, and tech stack. It writes a concise proposed AI/ML solution, engineering blockers, and clarification questions into Project Requirements. `enrich_requirements.py` then fuzzy-matches or creates the Account and Product Owner contact, links them back to the requirement, and moves the application to review. |
+
+### Campaign Tracker Rule
+
+`Campaign ID` in the Accounts database is not enough. Every social partnership campaign must also create or update one entry in the shared Campaign Tracker database and relate that entry back to all targeted Accounts. The entry must capture the campaign trigger, target audience, targeting reasoning, outreach summary, and the A/B/performance fields that the feedback agent or future reporting flow will update later.
+
+The normal NGO Notion import now syncs this automatically. If a teammate changes campaign membership manually in Notion, rerun the import as a dry run first, then apply the corrected Campaign Tracker sync or ask Codex to repair the Campaign Tracker entry so the Accounts database and Campaign Tracker stay aligned.
 
 ### Scoring Criteria Details
 
@@ -260,6 +267,7 @@ Open the local docs:
 | `NOTION_TOKEN` | Yes | Writing Accounts, Contacts, and project application data to Notion. |
 | `NOTION_DB_ACCOUNTS_ID` | Yes | Social partner organization records. |
 | `NOTION_DB_CONTACTS_ID` | Yes | Contact records linked to Accounts. Must be shared with the integration. |
+| `NOTION_DB_CAMPAIGNS_ID` | Yes | Shared Campaign Tracker database. Required so campaign creation is not limited to Account `Campaign ID` tags. |
 | `NOTION_DB_REQUIREMENTS_ID` | For project applications | Incoming project/application records from the intake workflow. |
 | `GMAIL_ADDRESS` | Optional | Sender address for completion reports. |
 | `GMAIL_APP_PASSWORD` | Optional | Gmail app password for sending completion reports. |
@@ -284,7 +292,7 @@ The social partnerships campaign flow uses the module commands below.
 | Preview Notion upload | You want to check creates/updates without writing | `python -m agents.notion_import_ngos --csv "data/ngo_partnerships/ngo_outreach.csv" --dry-run --limit 5` |
 | Project applications intake | You want to process new Tally applications manually | `cd project-applications && python requirements_analyzer.py && python enrich_requirements.py` |
 
-The full pipeline creates a campaign ID like `NGOs_DDMMYYYY_Mission`, assigns owners across the ranked list, writes CSV outputs in `data/ngo_partnerships/`, uploads to Notion unless `--dry-run` is set, and sends the completion email only when Gmail credentials exist.
+The full pipeline creates a campaign ID like `NGOs_DDMMYYYY_Mission`, assigns owners across the ranked list, writes CSV outputs in `data/ngo_partnerships/`, uploads to Notion unless `--dry-run` is set, creates or updates the Campaign Tracker entry with Account relations, and sends the completion email only when Gmail credentials exist.
 
 ---
 

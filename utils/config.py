@@ -18,6 +18,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
 NOTION_DB_ACCOUNTS_ID = os.getenv("NOTION_DB_ACCOUNTS_ID")
 NOTION_DB_CONTACTS_ID = os.getenv("NOTION_DB_CONTACTS_ID")
+NOTION_DB_CAMPAIGNS_ID = os.getenv("NOTION_DB_CAMPAIGNS_ID")  # Campaign Tracker database
 
 # Email Delivery
 GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS")
@@ -49,6 +50,8 @@ def validate_config():
         missing.append("NOTION_TOKEN")
     if not NOTION_DB_ACCOUNTS_ID:
         missing.append("NOTION_DB_ACCOUNTS_ID")
+    if not NOTION_DB_CAMPAIGNS_ID:
+        missing.append("NOTION_DB_CAMPAIGNS_ID")
     if missing:
         return False, missing
     return True, []

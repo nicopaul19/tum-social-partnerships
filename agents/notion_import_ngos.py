@@ -48,6 +48,7 @@ from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn
 
 from utils.config import NOTION_TOKEN, NOTION_DB_ACCOUNTS_ID, OPENAI_API_KEY
+from utils.campaign_tracker import sync_campaign_tracker_entry
 
 console = Console()
 
@@ -556,6 +557,7 @@ def run_import(csv_path: str, dry_run: bool = False, limit: int = 0, start_from:
     updated = 0
     skipped = 0
     errors = 0
+    account_page_ids: list[str] = []
 
     with Progress(
         SpinnerColumn(),
@@ -574,6 +576,7 @@ def run_import(csv_path: str, dry_run: bool = False, limit: int = 0, start_from:
             existing_id = find_existing_account(row, lookup)
 
             if existing_id:
+                account_page_ids.append(existing_id)
                 # Account exists — update empty fields
                 if not dry_run:
                     ok = update_account(existing_id, row)
@@ -592,6 +595,7 @@ def run_import(csv_path: str, dry_run: bool = False, limit: int = 0, start_from:
                     page_id = create_account(row)
                     if page_id:
                         created += 1
+                        account_page_ids.append(page_id)
                         # Add to lookup for dedup within this batch
                         domain = normalize_domain(clean_value(row.get("col href", "")))
                         if domain:
@@ -621,6 +625,27 @@ def run_import(csv_path: str, dry_run: bool = False, limit: int = 0, start_from:
     if dry_run:
         summary.add_row("Mode", "DRY RUN")
     console.print(summary)
+
+    if sample_campaign:
+        try:
+            sync_campaign_tracker_entry(
+                campaign_id=sample_campaign,
+                account_page_ids=account_page_ids,
+                rows=rows_to_process,
+                dry_run=dry_run,
+            )
+        except Exception as e:
+            console.print(f"[yellow]Campaign Tracker sync failed/skipped: {e}[/yellow]")
+
+    return {
+        "processed": len(rows_to_process),
+        "created": created,
+        "updated": updated,
+        "skipped": skipped,
+        "errors": errors,
+        "campaign_id": sample_campaign,
+        "account_page_ids": account_page_ids,
+    }
 
 
 # ---------------------------------------------------------------------------

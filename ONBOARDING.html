@@ -411,9 +411,14 @@
 <tr><td><code>ngo_enrichment_agent</code></td><td>Finds the best partnership contact and best available email.</td><td>Crawls the organization's homepage and likely subpages such as <code>impressum</code>, <code>about</code>, <code>team</code>, <code>leadership</code>, <code>contact</code>, <code>digital</code>, and <code>innovation</code>. It prefers senior decision-makers for small/mid-sized nonprofits, then digital/IT/innovation/partnerships leads for larger organizations. It avoids press, fundraising, volunteer, and generic office contacts unless nothing better exists.</td></tr>
 <tr><td><code>ngo_copywriter_agent</code></td><td>Generates German outreach drafts for the campaign sender.</td><td>Uses the RRR structure: relevance, reward, request. The prompt enforces German language, short paragraphs, nonprofit-sensitive tone, no hype, no hallucinated facts, a low-friction 20-minute CTA, and sender-specific sign-off. Processed learnings from <code>data/prompts/outreach_learnings.md</code> are injected into future runs.</td></tr>
 <tr><td><code>notion_import_ngos</code></td><td>Uploads reviewed campaign rows into Notion Accounts and contact-related fields.</td><td>Deduplicates by normalized domain and organization name. Maps CSV fields into Notion properties such as organization, website, city, work area, mission, campaign ID, lead score, estimated employees, suspect contact, email subject/body, and AI partnership angle.</td></tr>
+<tr><td><code>campaign_tracker</code></td><td>Maintains the shared Notion Campaign Tracker entry for every social partnership campaign.</td><td>The NGO Notion import creates or updates one Campaign Tracker page per <code>Campaign ID</code>, relates it back to the targeted Accounts, and records trigger, target audience, targeting reasoning, outreach summary, and performance placeholders for later feedback analysis.</td></tr>
 <tr><td>Project applications intake</td><td>Processes nonprofits that applied through the Project Requirements flow.</td><td><code>requirements_analyzer.py</code> acts as an AI GTM + forward-deployed-engineering reviewer. It reads problem statement, current effort, usage frequency, benefits, data readiness, data language, and tech stack. It writes a concise proposed AI/ML solution, engineering blockers, and clarification questions into Project Requirements. <code>enrich_requirements.py</code> then fuzzy-matches or creates the Account and Product Owner contact, links them back to the requirement, and moves the application to review.</td></tr>
 </tbody>
 </table>
+
+<h3>Campaign Tracker Rule</h3>
+<p><code>Campaign ID</code> in the Accounts database is not enough. Every social partnership campaign must also create or update one entry in the shared Campaign Tracker database and relate that entry back to all targeted Accounts. The entry must capture the campaign trigger, target audience, targeting reasoning, outreach summary, and the A/B/performance fields that the feedback agent or future reporting flow will update later.</p>
+<p>The normal NGO Notion import now syncs this automatically. If a teammate changes campaign membership manually in Notion, rerun the import as a dry run first, then apply the corrected Campaign Tracker sync or ask Codex to repair the Campaign Tracker entry so the Accounts database and Campaign Tracker stay aligned.</p>
 
 <h3>Scoring Criteria Details</h3>
 <p><code>ngo_partner_agent</code> returns <code>size_score</code>, <code>mission_score</code>, <code>establishment_score</code>, <code>total_score</code>, <code>reasoning</code>, and <code>ai_partnership_angle</code>.</p>
@@ -529,6 +534,7 @@ copy .env.template .env</code></pre>
 NOTION_TOKEN=
 NOTION_DB_ACCOUNTS_ID=
 NOTION_DB_CONTACTS_ID=
+NOTION_DB_CAMPAIGNS_ID=
 NOTION_DB_REQUIREMENTS_ID=</code></pre>
 <p>Optional Gmail report delivery:</p>
 <pre><code>GMAIL_ADDRESS=
@@ -548,6 +554,7 @@ python -m agents.run_ngo_pipeline --help</code></pre>
 <tr><td><code>NOTION_TOKEN</code></td><td style="text-align:right">Yes</td><td>Writing Accounts, Contacts, and project application data to Notion.</td></tr>
 <tr><td><code>NOTION_DB_ACCOUNTS_ID</code></td><td style="text-align:right">Yes</td><td>Social partner organization records.</td></tr>
 <tr><td><code>NOTION_DB_CONTACTS_ID</code></td><td style="text-align:right">Yes</td><td>Contact records linked to Accounts. Must be shared with the integration.</td></tr>
+<tr><td><code>NOTION_DB_CAMPAIGNS_ID</code></td><td style="text-align:right">Yes</td><td>Shared Campaign Tracker database. Required so campaign creation is not limited to Account <code>Campaign ID</code> tags.</td></tr>
 <tr><td><code>NOTION_DB_REQUIREMENTS_ID</code></td><td style="text-align:right">For project applications</td><td>Incoming project/application records from the intake workflow.</td></tr>
 <tr><td><code>GMAIL_ADDRESS</code></td><td style="text-align:right">Optional</td><td>Sender address for completion reports.</td></tr>
 <tr><td><code>GMAIL_APP_PASSWORD</code></td><td style="text-align:right">Optional</td><td>Gmail app password for sending completion reports.</td></tr>

@@ -376,14 +376,17 @@ def run_pipeline(csv_inputs: List[str], dry_run: bool = False, min_score: float 
 
     if not dry_run:
         from notion_import_ngos import run_import  # noqa: F401
-        # We patch run_import to capture its counters by reading stdout —
-        # instead, we call it and read the outreach CSV to tally results
-        # (notion_import_ngos already does full dedup via fetch_existing_accounts)
+        # notion_import_ngos also creates/updates the shared Campaign Tracker
+        # entry and relates it back to the campaign Accounts.
         try:
-            run_import(
+            import_result = run_import(
                 csv_path=str(OUTREACH_CSV),
                 dry_run=False,
             )
+            if import_result:
+                created = import_result.get("created", 0)
+                updated = import_result.get("updated", 0)
+                errors = import_result.get("errors", 0)
             # Re-read the outreach CSV to count rows for the email report
         except Exception as e:
             console.print(f"[red]❌ Notion upload failed: {e}[/red]")
