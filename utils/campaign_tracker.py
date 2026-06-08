@@ -18,6 +18,23 @@ from utils.config import NOTION_DB_ACCOUNTS_ID, NOTION_DB_CAMPAIGNS_ID, NOTION_T
 
 
 console = Console()
+CAMPAIGN_PAGE_ICON = "⛺"
+
+TRACKER_PROPS = {
+    "campaign_id": "🏷️ Campaign ID",
+    "campaign_type": "🤝 Campaign Team",
+    "campaign_trigger": "⚡ Campaign Trigger",
+    "target_audience": "🎯 Target Audience",
+    "targeting_reasoning": "🧠 Targeting Reasoning",
+    "outreach_summary": "📧 Outreach Summary",
+    "accounts": "🏢 Accounts",
+    "accounts_count": "🏢 Accounts Count",
+    "contacts_count": "👥 Contacts Count",
+    "engaged_contacts": "✅ Engaged Contacts",
+    "not_engaged_contacts": "🚫 Not Engaged Contacts",
+    "pending_contacts": "⏳ Pending Contacts",
+    "ab_winner": "🏆 A/B Winner",
+}
 
 NOTION_API_VERSION = "2022-06-28"
 NOTION_HEADERS = {
@@ -63,7 +80,7 @@ def _existing_campaign_page(database_id: str, title_prop: str, campaign_id: str)
         "filter": {
             "or": [
                 {"property": title_prop, "title": {"equals": campaign_id}},
-                {"property": "Campaign ID", "rich_text": {"equals": campaign_id}},
+                {"property": TRACKER_PROPS["campaign_id"], "rich_text": {"equals": campaign_id}},
             ]
         },
         "page_size": 1,
@@ -100,10 +117,11 @@ def ensure_campaign_tracker_schema(dry_run: bool = False) -> tuple[str, str] | N
     title_prop = _title_property(database)
     existing = database.get("properties", {})
 
+    p = TRACKER_PROPS
     missing: dict[str, Any] = {}
     desired = {
-        "Campaign ID": {"rich_text": {}},
-        "Campaign Type": {
+        p["campaign_id"]: {"rich_text": {}},
+        p["campaign_type"]: {
             "select": {
                 "options": [
                     {"name": "Social Partnerships", "color": "green"},
@@ -112,22 +130,22 @@ def ensure_campaign_tracker_schema(dry_run: bool = False) -> tuple[str, str] | N
                 ]
             }
         },
-        "Campaign Trigger": {"rich_text": {}},
-        "Target Audience": {"rich_text": {}},
-        "Targeting Reasoning": {"rich_text": {}},
-        "Outreach Summary": {"rich_text": {}},
-        "Accounts Count": {"number": {"format": "number"}},
-        "Contacts Count": {"number": {"format": "number"}},
-        "Engaged Contacts": {"number": {"format": "number"}},
-        "Not Engaged Contacts": {"number": {"format": "number"}},
-        "Pending Contacts": {"number": {"format": "number"}},
-        "A/B Winner": {"select": {"options": [{"name": "No Data", "color": "gray"}]}},
+        p["campaign_trigger"]: {"rich_text": {}},
+        p["target_audience"]: {"rich_text": {}},
+        p["targeting_reasoning"]: {"rich_text": {}},
+        p["outreach_summary"]: {"rich_text": {}},
+        p["accounts_count"]: {"number": {"format": "number"}},
+        p["contacts_count"]: {"number": {"format": "number"}},
+        p["engaged_contacts"]: {"number": {"format": "number"}},
+        p["not_engaged_contacts"]: {"number": {"format": "number"}},
+        p["pending_contacts"]: {"number": {"format": "number"}},
+        p["ab_winner"]: {"select": {"options": [{"name": "No Data", "color": "gray"}]}},
     }
     for name, spec in desired.items():
         if name not in existing:
             missing[name] = spec
-    if "Accounts" not in existing:
-        missing["Accounts"] = {"relation": {"database_id": accounts_db, "single_property": {}}}
+    if p["accounts"] not in existing:
+        missing[p["accounts"]] = {"relation": {"database_id": accounts_db, "single_property": {}}}
 
     if missing:
         if dry_run:
@@ -186,26 +204,27 @@ def sync_campaign_tracker_entry(
     if page:
         existing_account_ids = [
             rel.get("id")
-            for rel in page.get("properties", {}).get("Accounts", {}).get("relation", [])
+            for rel in page.get("properties", {}).get(TRACKER_PROPS["accounts"], {}).get("relation", [])
             if rel.get("id")
         ]
     relation_ids = list(dict.fromkeys(existing_account_ids + unique_account_ids))
 
+    p = TRACKER_PROPS
     properties: dict[str, Any] = {
         title_prop: {"title": [{"text": {"content": campaign_id}}]},
-        "Campaign ID": _rich_text(campaign_id),
-        "Campaign Type": {"select": {"name": "Social Partnerships"}},
-        "Campaign Trigger": _rich_text(trigger),
-        "Target Audience": _rich_text(audience),
-        "Targeting Reasoning": _rich_text(reasoning),
-        "Outreach Summary": _rich_text(summary),
-        "Accounts Count": {"number": len(relation_ids) or len(rows)},
-        "Contacts Count": {"number": len(rows)},
-        "Pending Contacts": {"number": len(rows)},
-        "A/B Winner": {"select": {"name": "No Data"}},
+        p["campaign_id"]: _rich_text(campaign_id),
+        p["campaign_type"]: {"select": {"name": "Social Partnerships"}},
+        p["campaign_trigger"]: _rich_text(trigger),
+        p["target_audience"]: _rich_text(audience),
+        p["targeting_reasoning"]: _rich_text(reasoning),
+        p["outreach_summary"]: _rich_text(summary),
+        p["accounts_count"]: {"number": len(relation_ids) or len(rows)},
+        p["contacts_count"]: {"number": len(rows)},
+        p["pending_contacts"]: {"number": len(rows)},
+        p["ab_winner"]: {"select": {"name": "No Data"}},
     }
     if relation_ids:
-        properties["Accounts"] = {"relation": [{"id": page_id} for page_id in relation_ids]}
+        properties[p["accounts"]] = {"relation": [{"id": page_id} for page_id in relation_ids]}
 
     if dry_run:
         console.print(
@@ -215,14 +234,22 @@ def sync_campaign_tracker_entry(
         return page.get("id") if page else None
 
     if page:
-        _notion_request("PATCH", f"/v1/pages/{page['id']}", {"properties": properties})
+        _notion_request(
+            "PATCH",
+            f"/v1/pages/{page['id']}",
+            {"icon": {"type": "emoji", "emoji": CAMPAIGN_PAGE_ICON}, "properties": properties},
+        )
         console.print(f"[green]Campaign Tracker updated: {campaign_id} ({len(relation_ids)} accounts)[/green]")
         return page["id"]
 
     created = _notion_request(
         "POST",
         "/v1/pages",
-        {"parent": {"database_id": campaigns_db}, "properties": properties},
+        {
+            "parent": {"database_id": campaigns_db},
+            "icon": {"type": "emoji", "emoji": CAMPAIGN_PAGE_ICON},
+            "properties": properties,
+        },
     )
     console.print(f"[green]Campaign Tracker created: {campaign_id} ({len(relation_ids)} accounts)[/green]")
     return created.get("id")
