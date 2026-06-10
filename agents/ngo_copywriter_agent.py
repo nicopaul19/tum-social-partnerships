@@ -287,7 +287,6 @@ def generate_email(client: OpenAI, ngo: dict, sender_name: str = "Carlo Renner")
     system_prompt = build_system_prompt(sender_name)
 
     last_result = None
-    last_usage = None
     quality_feedback = ""
     for attempt in range(1, 4):
         response = client.beta.chat.completions.parse(
@@ -301,7 +300,15 @@ def generate_email(client: OpenAI, ngo: dict, sender_name: str = "Carlo Renner")
         )
         result = response.choices[0].message.parsed
         last_result = result
-        last_usage = response.usage
+        # Log every attempt, not just the last one — quality-gate retries
+        # are real GPT-4o spend and must show up in cost reports.
+        log_api_usage(
+            agent="ngo_copywriter_agent",
+            action="email_generation",
+            model="gpt-4o",
+            usage=response.usage,
+            metadata={"ngo_name": ngo.get("ngo_name", ""), "attempt": attempt},
+        )
         issues = validate_ngo_email(result)
         if not issues:
             break
@@ -315,14 +322,6 @@ def generate_email(client: OpenAI, ngo: dict, sender_name: str = "Carlo Renner")
 
     if last_result is None:
         raise RuntimeError("OpenAI returned no NGO email")
-
-    log_api_usage(
-        agent="ngo_copywriter_agent",
-        action="email_generation",
-        model="gpt-4o",
-        usage=last_usage,
-        metadata={"ngo_name": ngo.get("ngo_name", "")},
-    )
 
     final_issues = validate_ngo_email(last_result)
     if final_issues:
@@ -349,7 +348,7 @@ def run_copywriter(dry_run: bool = False, limit: int = 0, start_from: int = 1,
         console.print("[red]OPENAI_API_KEY not set[/red]")
         return
 
-    client = OpenAI(api_key=OPENAI_API_KEY)
+    client = OpenAI(api_key=OPENAI_API_KEY, timeout=180.0, max_retries=4)
 
     # Load enriched CSV
     csv_path = Path(input_csv) if input_csv else NGO_ENRICHED_CSV

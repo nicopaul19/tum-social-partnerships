@@ -233,7 +233,7 @@ def run_scoring(csv_paths: list[str], min_score: float = 5.0, top_n: int = 0,
         console.print("[red]OPENAI_API_KEY not set in .env[/red]")
         sys.exit(1)
 
-    client = OpenAI(api_key=OPENAI_API_KEY)
+    client = OpenAI(api_key=OPENAI_API_KEY, timeout=180.0, max_retries=4)
 
     # Load all input CSVs and collect original headers
     all_ngos = []

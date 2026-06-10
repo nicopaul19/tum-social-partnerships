@@ -430,7 +430,7 @@ def run_enrichment(input_csv: str = "", limit: int = 0, start_from: int = 1):
         console.print("[red]OPENAI_API_KEY not set[/red]")
         sys.exit(1)
 
-    client = OpenAI(api_key=OPENAI_API_KEY)
+    client = OpenAI(api_key=OPENAI_API_KEY, timeout=180.0, max_retries=4)
 
     # Load input
     csv_path = Path(input_csv) if input_csv else NGO_RANKED_CSV

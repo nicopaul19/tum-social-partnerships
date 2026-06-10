@@ -240,7 +240,7 @@ def run_copywriter(
     if limit:
         rows = rows[:limit]
 
-    client = OpenAI(api_key=OPENAI_API_KEY)
+    client = OpenAI(api_key=OPENAI_API_KEY, timeout=180.0, max_retries=4)
     results = []
     input_headers = list(rows[0].keys()) if rows else []
 

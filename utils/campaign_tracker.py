@@ -11,7 +11,7 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
-import requests as http_requests
+from utils import resilient_http as http_requests
 from rich.console import Console
 
 from utils.config import NOTION_DB_ACCOUNTS_ID, NOTION_DB_CAMPAIGNS_ID, NOTION_TOKEN
@@ -63,7 +63,10 @@ def _notion_request(method: str, endpoint: str, payload: dict | None = None) -> 
         timeout=30,
     )
     if response.status_code >= 400:
-        message = response.json().get("message", response.text[:300])
+        try:
+            message = response.json().get("message", response.text[:300])
+        except Exception:
+            message = response.text[:300]
         raise RuntimeError(f"Notion {method} {endpoint} failed: {response.status_code} - {message}")
     return response.json()
 

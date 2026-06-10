@@ -16,11 +16,12 @@ from pathlib import Path
 from typing import Optional
 from urllib.parse import urlparse
 
-import requests as http_requests
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from utils import resilient_http as http_requests
 
 from openai import OpenAI
 from rich.console import Console
@@ -285,7 +286,7 @@ def main(dry_run: bool = False):
 
     # ── GPT-4o batch lookup ───────────────────────────────────────────────────
     console.print(Rule("[bold]GPT-4o Email Lookup[/bold]"))
-    client = OpenAI(api_key=OPENAI_API_KEY)
+    client = OpenAI(api_key=OPENAI_API_KEY, timeout=180.0, max_retries=4)
 
     # Process in one batch (20 NGOs is fine)
     gpt_results = lookup_emails_with_gpt(client, missing)

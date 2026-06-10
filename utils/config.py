@@ -16,6 +16,9 @@ load_dotenv(PROJECT_ROOT / ".env", override=True)  # Project-specific (overrides
 # API Keys
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
+# Defined for utils.notion_client (shared with strategic-partnerships); the
+# social pipeline itself does not use a qualified-leads database.
+NOTION_DB_QUALIFIED_ID = os.getenv("NOTION_DB_QUALIFIED_ID")
 NOTION_DB_ACCOUNTS_ID = os.getenv("NOTION_DB_ACCOUNTS_ID")
 NOTION_DB_CONTACTS_ID = os.getenv("NOTION_DB_CONTACTS_ID")
 NOTION_DB_CAMPAIGNS_ID = os.getenv("NOTION_DB_CAMPAIGNS_ID")  # Campaign Tracker database

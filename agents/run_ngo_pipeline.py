@@ -12,7 +12,7 @@ PIPELINE STEPS:
   3. Enrich contacts             (ngo_enrichment_agent)
   4. Generate outreach emails    (ngo_copywriter_agent)
   5. Upload to Notion            (notion_import_ngos)  ← dedup against full DB
-  6. Send completion email       → neuropaul19@gmail.com + carlo.rn02@gmail.com
+  6. Send completion email       → REPORT_RECIPIENTS (see below)
 
 CAMPAIGN ID FORMAT: "NGOs_DDMMYYYY_[MISSION]"
   where MISSION is derived from the most common `work_area` in the input CSV.
@@ -302,8 +302,9 @@ def run_pipeline(csv_inputs: List[str], dry_run: bool = False, min_score: float 
     # Assign owners 50/50 alternating by rank order
     NGO_OWNERS = ["Carlo Renner", "Lisa Gavrilova"]
     with open(RANKED_CSV, encoding="utf-8") as f:
-        ranked_rows = list(csv.DictReader(f))
-        ranked_headers = list(csv.DictReader(open(RANKED_CSV, encoding="utf-8")).fieldnames or [])
+        reader = csv.DictReader(f)
+        ranked_headers = list(reader.fieldnames or [])
+        ranked_rows = list(reader)
     for i, row in enumerate(ranked_rows):
         row["owner"] = NGO_OWNERS[i % 2]
     if "owner" not in ranked_headers:

@@ -38,10 +38,11 @@ from pathlib import Path
 from typing import Optional
 from urllib.parse import urlparse
 
-import requests as http_requests
 
 # NGO Outreach/ → agents/ → tum_sales_agent/
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from utils import resilient_http as http_requests
 
 from rich.console import Console
 from rich.table import Table
