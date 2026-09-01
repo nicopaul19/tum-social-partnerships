@@ -68,6 +68,7 @@ OWNER_IDS: dict[str, str] = {
     "Carlo Renner":    "2c5d872b-594c-81ca-abfc-00023d45afd3",
     "Lisa Gavrilova":  "328d872b-594c-8133-8a1f-00020ea856a1",
     "Florian Lichius": "a6894add-55e8-481c-8c25-39760d7e7593",
+    "Anna Lhamby":     "362d872b-594c-816c-b89a-00020b974c5b",
 }
 
 # Notion API config
